@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+  <head>
+
+		<meta charset="utf-8"></meta>
+		<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+		<title>SmartHome</title>
+		<link rel="shortcut icon" href="favicon.ico"></link>
+		<link rel='stylesheet' type='text/css' href='demo.css' />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
+	
+		<link rel="stylesheet" href="_assets/css/jqm-demos.css"></link>
+		<!-- Lokales CSS -->
+		<style type="text/css">
+			.li {
+				height: 20px;
+			}
+			#right{
+				float:right;
+				margin: 0.5em;
+			}
+			#top_checkbox{
+				margin-top:0.5em;
+			}
+			#top_text{
+				margin-left:2em;
+			}
+			.jqm-home .ui-grid-a{
+				margin:0 !important;
+			}
+			#menu{
+				margin-top: 10px;
+				margin-left: 10px;
+			}
+		body {
+		  padding-top: 10px;
+		  background-color: #F5F5F5;
+		}
+		.nav > li {
+			float:none;
+			display:inline-block;
+			*display:inline; /* Internet Explorer 7 compatibility */
+			*zoom:1;
+			vertical-align: top;
+		}
+		
+		</style>
+
+
+  </head>
+<body ng-app="sampleApp" ng-controller="AppController">
+	<div>
+
+		<div class="ui-content">
+			<button ng-click="toggleMenu()" class="menubotton"></button>
+			<div ng-view role="main">
+			</div><!-- /content -->
+		</div>
+
+		<div id="menuleft" ng-class="{hide:!showmenu,slide:showmenu}"  >
+			<ul class="jqm-list ui-alt-icon ui-nodisc-icon">
+				<li><a ng-click="toggleMenu('/favoriten')"	>Übersicht</a></li>
+				<li><a ng-click="toggleMenu('/devices')" 	>Geräte</a></li>
+				<li><a ng-click="toggleMenu('/temperature')" 	>Temperatur</a></li>
+				<li><a ng-click="toggleMenu()" href="#/groups"		>Gruppen</a></li>
+				<li><a ng-click="toggleMenu()" href="#/rooms" 		>Räume</a></li>
+				<li><a ng-click="toggleMenu()" href="#/button"		>Timer</a></li>
+				<br>
+				<br>
+				<li><a ng-click="toggleMenu()" >Schließen</a></li>
+				<li><a href="/settings"		>Einstellungen</a></li>
+			</ul>
+		</div><!-- /panel -->
+	</div><!-- /page -->
+
+
+	
+		<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.4.5.min.css"></link>
+<!--
+		<script src="lib/snapjs/snap.js"></script>
+		<script src="js/jquery.js"></script>
+		<script src="_assets/js/index.js"></script>
+		<script src="js/jquery.mobile-1.4.5.min.js"></script>
+		<script src='/socket.io/socket.io.js'></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+-->
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.min.js"></script>
+	<script src="http://code.angularjs.org/1.2.0rc1/angular-route.min.js"></script>
+	<script src="http://code.angularjs.org/1.2.0rc1/angular-touch.min.js"></script>
+	
+<!-- 	<script src="https://code.angularjs.org/1.3.9/angular.min.js"></script>
+	<script src="https://code.angularjs.org/1.3.9/angular.min.js"></script> -->
+	<!--
+	<script src="https://code.angularjs.org/1.3.0rc1/angular-route.min.js.map"></script> 
+	<script src="http://code.angularjs.org/1.3.0rc1/angular-touch.min.js"></script> -->
+	<script src='/socket.io/socket.io.js'></script>
+	<script src="demo.js"></script>
+
+
+  </body>
+</html>

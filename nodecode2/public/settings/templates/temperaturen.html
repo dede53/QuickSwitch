@@ -1,0 +1,13 @@
+﻿<div jqm>
+	<h1>Temperaturen</h1>
+	<div class="ui-block-b">
+		<div class="jqm-block-content">
+			<h3>Temperaturen</h3>
+			<ul data-role="listview" data-inset="false">
+				<li ng-repeat="temp in temperature">
+					<p>{{temp.place}}: {{temp.temp}}°C</p>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

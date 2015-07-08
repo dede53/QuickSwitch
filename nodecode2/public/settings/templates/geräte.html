@@ -1,0 +1,34 @@
+﻿<div jqm>
+		<h1>SmartHome</h1>
+        <div class="ui-grid-a ui-responsive">
+        	<!-- <div class="ui-block-a"> -->
+        		<div class="jqm-block-content">
+        			<h3>Daniel</h3>
+ 					<ul>
+ 						<li ng-repeat="(f1, zutaten) in devicelist">
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								{{zutaten.name}}
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+									<div class="box-btn-switch">	
+										<a href="#/editDevice/{{zutaten.deviceid}}" id="btnOn{{zutaten.id}}" >Bearbeiten</a>
+										<button  id="btnOn{{zutaten.id}}" ng-click='deleteDevice({"id":zutaten.deviceid,"status":"1"})' >Löschen</button>
+									</div>
+								</div>
+							</div>
+						</li>
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+									<a href="#/editDevice/" >Neues Gerät anlegen</a>
+								</div>
+							</div>
+						<li>
+						</li>
+					</ul>
+        		</div>
+        	<!-- </div> -->
+        </div>
+</div>

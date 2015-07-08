@@ -1,0 +1,105 @@
+<div jqm>
+		<h1>Gerät</h1>
+        <div class="ui-grid-a ui-responsive">
+        	<!-- <div class="ui-block-a"> -->
+        		<div class="jqm-block-content">
+        			<h3>{{editDevice.title}}</h3>
+ 					<ul>
+ <!-- 						<li ng-repeat="(f1, zutaten) in devicelist">
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								{{zutaten.name}}
+								</div>
+									<div class="ui-block-b" style="text-align:right">
+									<div class="box-btn-switch">	
+										<button  id="btnOn{{zutaten.id}}" ng-click='editDevice({"id":zutaten.deviceid,"status":"1"})' >Bearbeiten</button>
+										<button  id="btnOn{{zutaten.id}}" ng-click='switchdevice({"id":zutaten.deviceid,"status":"1"})' >Löschen</button>
+									</div>
+								</div>
+							</div>
+						</li> -->
+<script type="text/javascript">
+   
+it('should check ng-submit', function() {
+  expect(element(by.binding('list')).getText()).toBe('list=[]');
+  element(by.css('#submit')).click();
+  expect(element(by.binding('list')).getText()).toContain('hello');
+  expect(element(by.model('text')).getAttribute('value')).toBe('');
+});
+it('should ignore empty strings', function() {
+  expect(element(by.binding('list')).getText()).toBe('list=[]');
+  element(by.css('#submit')).click();
+  element(by.css('#submit')).click();
+  expect(element(by.binding('list')).getText()).toContain('hello');
+ });
+   </script>
+						
+						
+ 						<li>
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								{{editDevice.devicelist.name}}
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+								<ul>
+									<form ng-controller="saveDeviceController">
+									<input type="hidden" id="deviceid" value="{{editDevice.devicelist.deviceid}}">
+									<li>
+										<label for="name">Name</label>
+										<input type="text" placeholder="Name" ng-model="editDevice.devicelist.name" id="name" value="{{editDevice.devicelist.name}}"/>
+									</li>
+									<li>
+										<label for="buttonLabelOn">Buttontitel an</label>
+										<input type="text" placeholder="Name/Anschaltbutton" ng-model="editDevice.devicelist.buttonLabelOn" id="buttonLabelOn" value="{{editDevice.devicelist.buttonLabelOn}}"/>
+									</li>
+									<li>
+										<label for="buttonLabelOff">Buttontitel aus</label>
+										<input type="text" placeholder="Name/Ausschaltbutton" ng-model="editDevice.devicelist.buttonLabelOff" id="buttonLabelOff" value="{{editDevice.devicelist.buttonLabelOff}}"/>
+									</li>
+									<li>
+										<label for="CodeOn">Einschaltcode</label>
+										<input type="text" placeholder="On-Code/Masterdip" ng-model="editDevice.devicelist.CodeOn" id="CodeOn" value="{{editDevice.devicelist.CodeOn}}"/>
+									</li>
+									<li>
+										<label for="CodeOff">Ausschaltcode</label>
+										<input type="text" placeholder="Off-Code/Slavedip" ng-model="editDevice.devicelist.CodeOff" id="CodeOff" value="{{editDevice.devicelist.CodeOff}}"/>
+									</li>
+									<li>
+										<label for="room">Raum</label>
+										<input type="text" ng-model="editDevice.devicelist.room" id="room" value="{{editDevice.devicelist.room}}"/>
+									</li>
+									<li>
+										<p>
+											<!-- {{selectedOption}} -->
+											<!-- {{options}} -->
+											<!-- {{editDevice.devicelist.protocol}} -->
+										</p>
+									</li>
+									<li>
+										<label for="protocol">Protocol</label>
+										
+										<!-- <select 
+                ng-model="options.SelectedOption"                 
+                ng-options="choice.Name for choice in options.Options track by choice.ID"
+				id="protocol"
+				></select> -->
+				
+										    <select
+											ng-model="editDevice.devicelist.protocol"
+											ng-options="value.name for value in options track by value.id"></select>
+										<!-- <select  ng-options="o.name for o in options"  data-ng-model="protocol" id="protocol" ></select> -->
+										<!-- <select  ng-options="o.name for o in options" data-ng-model="editDevice.devicelist.protocol" id="protocol" >{{editDevice.devicelist.protocol}}</select> -->
+									</li>
+									<li>
+										<button ng-click="submitnew()">Speichern</button>
+									</li>
+									</form>
+								</ul>
+								</div>
+							</div>
+						</li>
+					</ul>
+        		</div>
+        	<!-- </div> -->
+        </div>
+</div>

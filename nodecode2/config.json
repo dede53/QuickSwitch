@@ -1,0 +1,122 @@
+{
+	"server":{
+		"port": "7077",
+		"ip": "192.168.2.47"
+	},
+	"connair":{
+		"port": 49880,
+		"ip": "192.168.2.27"
+	},
+	"persons": {
+		"1":{
+			"name":"Daniel"
+		},
+		"2":{
+			"name":"Mirjam"
+		},
+		"3":{
+			"name":"Elke"
+		}
+	},
+	"activedevices": {
+		"1":{
+			"name": "Tisch",
+			"room": "Wohnzimmer"
+		},
+		"2":{
+			"name": "Tisch",
+			"room": "Wohnzimmer"
+		}
+	},
+	"temperature": {
+		"1":{
+			"name":"Daniel",
+			"value":"5,5"
+		},
+		"2":{
+			"name":"Balkon",
+			"value":"22,5"
+		}
+	},
+	"devices": {
+		"1":{
+			"buttonLabelOff": "AUS",
+			"buttonLabelOn": "EIN",
+			"name": "Tisch1",
+			"vendor": "Elro",
+			"address": {
+				"masterdip": "11111",
+				"slavedip": "10000"
+			},
+			"room": "Wohnzimmer",
+			"status": "OFF",
+			"showDeviceStatus": "OFF"
+		},
+		"2":{
+			"buttonLabelOff": "AUS",
+			"buttonLabelOn": "EIN",
+			"name": "Tisch2",
+			"vendor": "Elro",
+			"address": {
+				"masterdip": "11111",
+				"slavedip": "10000"
+			},
+			"room": "Wohnzimmer",
+			"status": "OFF",
+			"showDeviceStatus": "OFF"
+		},
+		"30":{
+			"buttonLabelOff": "AUS",
+			"buttonLabelOn": "EIN",
+			"name": "Tisch30",
+			"vendor": "Elro",
+			"address": {
+				"masterdip": "11111",
+				"slavedip": "10000"
+			},
+			"room": "Wohnzimmer",
+			"status": "OFF",
+			"showDeviceStatus": "OFF"
+		},
+		"4":{
+			"buttonLabelOff": "AUS",
+			"buttonLabelOn": "EIN",
+			"name": "Tisch4",
+			"vendor": "Elro",
+			"address": {
+				"masterdip": "11111",
+				"slavedip": "10000"
+			},
+			"room": "Daniel",
+			"status": "OFF",
+			"showDeviceStatus": "OFF"
+		},
+		"5":{
+			"buttonLabelOff": "AUS",
+			"buttonLabelOn": "EIN",
+			"name": "Tisch5",
+			"vendor": "Elro",
+			"address": {
+				"masterdip": "11111",
+				"slavedip": "10000"
+			},
+			"room": "Daniel",
+			"status": "OFF",
+			"showDeviceStatus": "OFF"
+		},
+		"6":{
+			"buttonLabelOff": "AUS",
+			"buttonLabelOn": "EIN",
+			"name": "Tisch6",
+			"vendor": "Elro",
+			"address": {
+				"masterdip": "11111",
+				"slavedip": "10000"
+			},
+			"room": "Daniel",
+			"status": "OFF",
+			"showDeviceStatus": "OFF"
+		}
+	}
+	
+}

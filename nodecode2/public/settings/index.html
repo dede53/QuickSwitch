@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+  <head>
+
+		<meta charset="utf-8"></meta>
+		<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+		<title>SmartHome</title>
+		<link rel="shortcut icon" href="favicon.ico"></link>
+		<link rel='stylesheet' type='text/css' href='demo.css' />
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
+	
+		<link rel="stylesheet" href="_assets/css/jqm-demos.css"></link>
+		<!-- Lokales CSS -->
+		<style type="text/css">
+			.li {
+				height: 20px;
+			}
+			#right{
+				float:right;
+				margin: 0.5em;
+			}
+			#top_checkbox{
+				margin-top:0.5em;
+			}
+			#top_text{
+				margin-left:2em;
+			}
+			.jqm-home .ui-grid-a{
+				margin:0 !important;
+			}
+			#menu{
+				margin-top: 10px;
+				margin-left: 10px;
+			}
+		body {
+		  padding-top: 10px;
+		  background-color: #F5F5F5;
+		}
+		.nav > li {
+			float:none;
+			display:inline-block;
+			*display:inline; /* Internet Explorer 7 compatibility */
+			*zoom:1;
+			vertical-align: top;
+		}
+		
+		</style>
+
+
+  </head>
+<body ng-app="sampleApp" ng-controller="AppController">
+	<div>
+
+		<div class="ui-content">
+			<button ng-click="toggleMenu()" class="menubotton"></button>
+			<div ng-view role="main">
+			</div><!-- /content -->
+		</div>
+
+		<div id="menuleft" ng-class="{hide:!showmenu,slide:showmenu}"  >
+			<ul class="jqm-list ui-alt-icon ui-nodisc-icon">
+				<li><a ng-click="toggleMenu('/favoriten')"			>Übersicht</a></li>
+				<li><a ng-click="toggleMenu('/devices')" 			>Geräte</a></li>
+				<li><a ng-click="toggleMenu('/temperature')" 		>Temperatur</a></li>
+				<li><a ng-click="toggleMenu()" href="#/groups"		>Gruppen</a></li>
+				<li><a ng-click="toggleMenu()" href="#/rooms" 		>Räume</a></li>
+				<li><a ng-click="toggleMenu()" href="#/button"		>Timer</a></li>
+				<br>
+				<br>
+				<li><a href="../"			>Zurück</a></li>
+			</ul>
+		</div><!-- /panel -->
+	</div><!-- /page -->
+
+
+	
+		<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.4.5.min.css"></link>
+<!--
+		<script src="lib/snapjs/snap.js"></script>
+		<script src="js/jquery.js"></script>
+		<script src="_assets/js/index.js"></script>
+		<script src="js/jquery.mobile-1.4.5.min.js"></script>
+		<script src='/socket.io/socket.io.js'></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+-->
+	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.min.js"></script>
+	<script src="http://code.angularjs.org/1.2.0rc1/angular-route.min.js"></script>
+	<script src="http://code.angularjs.org/1.2.0rc1/angular-touch.min.js"></script>
+	<script src='/socket.io/socket.io.js'></script>
+	<script src="demo.js"></script>
+	<script>
+/*
+var sampleApp = angular.module('sampleApp', ['ngRoute','ngTouch']);
+
+	sampleApp.config(['$routeProvider', function($routeProvider) {
+		$routeProvider.
+		when('/favoriten', {
+			templateUrl: 'templates/favoriten.html',
+			controller: 'AddOrderController'
+		}).
+		when('/devices', {
+			templateUrl: 'temperaturen.html',
+			controller: 'ShowOrdersController'
+		}).
+		otherwise({
+			redirectTo: '/favoriten'
+		});
+	}]);
+	
+
+	sampleApp.controller("AppController", function($scope){
+		$scope.showmenu=false;
+		$scope.toggleMenu = function(){
+			$scope.showmenu=($scope.showmenu) ? false : true;
+		}
+	});
+	sampleApp.factory('socket', function ($rootScope) {
+			var socket = io.connect();
+			return {
+				on: function (eventName, callback) {
+					socket.on(eventName, function () {  
+						var args = arguments;
+						$rootScope.$apply(function () {
+							callback.apply(socket, args);
+						});
+					});
+				},
+				emit: function (eventName, data, callback) {
+					socket.emit(eventName, data, function () {
+						var args = arguments;
+						$rootScope.$apply(function () {
+							if (callback) {
+								callback.apply(socket, args);
+							}
+						});
+					})
+				}
+			};
+		});
+
+	sampleApp.controller('AddOrderController', function($scope, socket) {
+		$scope.showmenu=false;
+		$scope.toggleMenu = function(){
+			$scope.showmenu=($scope.showmenu) ? false : true;
+		}
+		socket.emit('ready');
+
+		$scope.switchdevice = function(data) {
+			socket.emit('switchdevice', {"id":data.id,"status":data.status});
+			//alert(data.id+' : '+data.status);
+		}
+		
+		
+		socket.on('talk', function(data) {
+			$scope.devicelist = data.devices;
+			$scope.activedevices = data.activedevices;
+			$scope.persons = data.persons;
+			$scope.temperature = data.temperature;
+		});
+		socket.on('switchdevice', function(data){
+			//alert(data.id+' : '+data.status);
+			$('#lastswitch').append('<li><p>Gerät:'+data.id+' Status: '+data.status+'</p></li>');
+		});
+		socket.on('hint', function(data){
+			alert(data.message);
+		});
+	});
+
+
+	sampleApp.controller('ShowOrdersController', function($scope) {
+
+		$scope.message = 'This is Show orders screen';
+
+	});
+	
+
+		*/
+/*
+		App.controller('devicelist', function($scope, socket) {
+			socket.emit('ready');
+
+			$scope.switchdevice = function(data) {
+				socket.emit('switchdevice', {"id":data.id,"status":data.status});
+				//alert(data.id+' : '+data.status);
+			}
+			
+			
+			socket.on('talk', function(data) {
+				$scope.devicelist = data.devices;
+				$scope.activedevices = data.activedevices;
+				$scope.persons = data.persons;
+				$scope.temperature = data.temperature;
+			});
+			socket.on('switchdevice', function(data){
+				//alert(data.id+' : '+data.status);
+				$('#lastswitch').append('<li><p>Gerät:'+data.id+' Status: '+data.status+'</p></li>');
+			});
+			socket.on('hint', function(data){
+				alert(data.message);
+			});
+		});
+*/	
+	
+	</script>
+
+  </body>
+</html>
