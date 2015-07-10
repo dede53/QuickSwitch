@@ -15,6 +15,7 @@
 		"sleep": "1.1.0",
 		"request": "2.58.0",
 		"body-parser":"1.13.*",
-		"multer":"0.1.8"
+		"multer":"0.1.8",
+		"smartfritz":"0.1.7"
     }
 }
