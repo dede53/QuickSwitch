@@ -1,14 +1,20 @@
 ﻿<!DOCTYPE html>
 <html lang="de">
   <head>
-
+		<link rel="shortcut icon" href="favicon.ico"/> 
 		<meta charset="utf-8"></meta>
-		<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+		
+		<meta name="viewport" content="width = device-width" >
+		
+		<!-- Android -->
+		<!-- <meta name="mobile-web-app-capable" content="yes" /> -->
+		 
+		<!-- iOS -->
+		<!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
+		
 		<title>SmartHome</title>
-		<link rel="shortcut icon" href="favicon.ico"></link>
 		<link rel='stylesheet' type='text/css' href='demo.css' />
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
-	
+		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
 		<link rel="stylesheet" href="_assets/css/jqm-demos.css"></link>
 		<!-- Lokales CSS -->
 		<style type="text/css">
@@ -32,71 +38,106 @@
 				margin-top: 10px;
 				margin-left: 10px;
 			}
-		body {
-		  padding-top: 10px;
-		  background-color: #F5F5F5;
-		}
-		.nav > li {
-			float:none;
-			display:inline-block;
-			*display:inline; /* Internet Explorer 7 compatibility */
-			*zoom:1;
-			vertical-align: top;
-		}
-		
+			body {
+			  padding-top: 10px;
+			  background-color: #F5F5F5;
+			}
+			.nav > li {
+				float:none;
+				display:inline-block;
+				*display:inline; /* Internet Explorer 7 compatibility */
+				*zoom:1;
+				vertical-align: top;
+			}
+			#activeUser{
+				<!-- margin-right: 10px; -->
+				margin-right: auto;
+				margin-left: auto;
+				
+				border:0;
+				background-color:transparent;
+				z-index:		1000;
+				<!-- width:			29px; -->
+				height:			29px;
+				align:right;
+				<!-- background:		transparent url('button.png') no-repeat; -->
+
+			}	
 		</style>
 
-
+<script type="text/javascript">
+function overlay() {
+	el = document.getElementById("overlay");
+	el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+}
+</script>
   </head>
 <body ng-app="sampleApp" ng-controller="AppController">
 	<div>
 
 		<div class="ui-content">
-			<button ng-click="toggleMenu()" class="menubotton"></button>
+			<div class="ui-grid-a">
+				<div class="ui-block-a">
+					<button ng-click="toggleMenu()" class="menubotton"></button>
+				</div>
+				<div class="ui-block-b" style="text-align:right">
+					<select
+						id="activeUser"
+						ng-options="item.name for item in values track by item.id"
+						ng-model="activeUser"
+						ng-change="setUser()"
+					>
+					</select>
+					<!-- <button onclick='overlay()'>{{activeUser.name}}</button> -->
+				</div>
+			</div>
 			<div ng-view role="main">
 			</div><!-- /content -->
 		</div>
-
+<!-- 		<div id="instruction" style="visibility: hidden;{{instruction.css}}">
+			<div style="{{instruction.css2}}">
+				<p>{{instruction.text}}</p>
+				<a ng-click="instruction.toggle('instruction')">OK</a>
+			</div>
+		</div>
+		<div id="overlay">
+			<div>
+				<select
+						id="activeUser"
+						ng-options="item.name for item in values track by item.id"
+						ng-model="activeUser"
+						ng-change="setUser()"
+					>
+					</select>
+			</div>
+		</div> -->
 		<div id="menuleft" ng-class="{hide:!showmenu,slide:showmenu}"  >
 			<ul class="jqm-list ui-alt-icon ui-nodisc-icon">
-				<li><a ng-click="toggleMenu('/favoriten')"	>Übersicht</a></li>
-				<li><a ng-click="toggleMenu('/devices')" 	>Geräte</a></li>
-				<li><a ng-click="toggleMenu('/temperature')" 	>Temperatur</a></li>
-				<li><a ng-click="toggleMenu()" href="#/groups"		>Gruppen</a></li>
-				<li><a ng-click="toggleMenu()" href="#/rooms" 		>Räume</a></li>
-				<li><a ng-click="toggleMenu()" href="#/button"		>Timer</a></li>
+				<li><a ng-click="toggleMenu('/favoriten')"		>Übersicht</a></li>
+				<li><a ng-click="toggleMenu('/devices')"		>Geräte</a></li>
+				<li><a ng-click="toggleMenu('/temperature')"	>Temperatur</a></li>
+				<li><a ng-click="toggleMenu()" href="#/groups"	>Gruppen</a></li>
+				<li><a ng-click="toggleMenu('/rooms')"			>Räume</a></li>
+				<li><a ng-click="toggleMenu()" href="#/button"	>Timer</a></li>
 				<br>
 				<br>
-				<li><a ng-click="toggleMenu()" >Schließen</a></li>
-				<li><a href="/settings"		>Einstellungen</a></li>
+				<li><a href="/settings"		>SmartHome - Einstellungen</a></li>
 			</ul>
 		</div><!-- /panel -->
 	</div><!-- /page -->
 
 
 	
-		<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.4.5.min.css"></link>
-<!--
-		<script src="lib/snapjs/snap.js"></script>
-		<script src="js/jquery.js"></script>
-		<script src="_assets/js/index.js"></script>
-		<script src="js/jquery.mobile-1.4.5.min.js"></script>
-		<script src='/socket.io/socket.io.js'></script>
-		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
--->
+	<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.4.5.min.css"></link>
 	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
 	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.min.js"></script>
 	<script src="http://code.angularjs.org/1.2.0rc1/angular-route.min.js"></script>
 	<script src="http://code.angularjs.org/1.2.0rc1/angular-touch.min.js"></script>
-	
-<!-- 	<script src="https://code.angularjs.org/1.3.9/angular.min.js"></script>
-	<script src="https://code.angularjs.org/1.3.9/angular.min.js"></script> -->
-	<!--
-	<script src="https://code.angularjs.org/1.3.0rc1/angular-route.min.js.map"></script> 
-	<script src="http://code.angularjs.org/1.3.0rc1/angular-touch.min.js"></script> -->
 	<script src='/socket.io/socket.io.js'></script>
 	<script src="demo.js"></script>
-
-
+	
+	<script src="http://code.highcharts.com/adapters/standalone-framework.js"></script>
+    <script src="http://code.highcharts.com/stock/highstock.src.js"></script>
+    <script src="highcharts-ng.js"></script>
   </body>
 </html>

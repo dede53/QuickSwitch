@@ -1,0 +1,30 @@
+﻿<div jqm>
+
+		<h1>SmartHome</h1>
+        		<div class="jqm-block-content">
+ 					<ul>
+						<li ng-repeat="user in users">
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								{{user.name}}
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+									<div class="box-btn-switch">
+										<a href="#/editUser/{{user.id}}" id="btnOn{{user.id}}" >Bearbeiten</a>
+										<button  id="btnOn{{user.id}}" ng-click='deleteUser({"id":user.id,"status":"1"})' >Löschen</button>
+									</div>
+								</div>
+							</div>
+						</li>
+						<li>
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+									<a href="#/editUser/" >Neuen Benutzer anlegen</a>
+								</div>
+							</div>
+						</li>
+					</ul>
+        		</div>
+</div>

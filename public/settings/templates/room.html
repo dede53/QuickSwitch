@@ -1,0 +1,30 @@
+﻿<div jqm>
+
+		<h1>SmartHome</h1>
+        		<div class="jqm-block-content">
+ 					<ul>
+						<li ng-repeat="room in roomlist">
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								{{room.name}}
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+									<div class="box-btn-switch">
+										<a href="#/editRoom/{{room.id}}" id="btnOn{{room.id}}" >Bearbeiten</a>
+										<button  id="btnOn{{room.id}}" ng-click='deleteRoom({"id":room.id})' >Löschen</button>
+									</div>
+								</div>
+							</div>
+						</li>
+						<li>
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								</div>
+								<div class="ui-block-b" style="text-align:right">
+									<a href="#/editRoom/" >Neuen Raum anlegen</a>
+								</div>
+							</div>
+						</li>
+					</ul>
+        		</div>
+</div>

@@ -1,23 +1,28 @@
 ﻿<div jqm>
-		<h1>SmartHome</h1>
+		<h1>Einstellungen</h1>
         <div class="ui-grid-a ui-responsive">
         	<!-- <div class="ui-block-a"> -->
-        		<div class="jqm-block-content">
-        			<h3>Daniel</h3>
+        		<div class="jqm-block-content">	
  					<ul>
- 						<li ng-repeat="(f1, zutaten) in devicelist">
-							<div class="ui-grid-a">
-								<div class="ui-block-a" style="text-align:left">
-								{{zutaten.name}}
-								</div>
-								<div class="ui-block-b" style="text-align:right">
-									<div class="box-btn-switch">	
-										<a href="#/editDevice/{{zutaten.deviceid}}" id="btnOn{{zutaten.id}}" >Bearbeiten</a>
-										<button  id="btnOn{{zutaten.id}}" ng-click='deleteDevice({"id":zutaten.deviceid,"status":"1"})' >Löschen</button>
+						<li ng-repeat="rooms in devicelist">
+							<div ng-repeat="(key, room) in rooms">
+								<h3>{{key}}</h3>
+								<div ng-repeat="devices in room">
+									<div class="ui-grid-a">
+										<div class="ui-block-a" style="text-align:left">
+										{{devices.name}}
+										</div>
+										<div class="ui-block-b" style="text-align:right">
+											<div class="box-btn-switch">
+												<a href="#/editDevice/{{devices.deviceid}}" id="btnOn{{devices.deviceid}}" >Bearbeiten</a>
+												<button  id="btnOn{{devices.deviceid}}" ng-click='deleteDevice({"id":devices.deviceid,"status":"1"})' >Löschen</button>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
 						</li>
+						<li>
 							<div class="ui-grid-a">
 								<div class="ui-block-a" style="text-align:left">
 								</div>
@@ -25,7 +30,6 @@
 									<a href="#/editDevice/" >Neues Gerät anlegen</a>
 								</div>
 							</div>
-						<li>
 						</li>
 					</ul>
         		</div>

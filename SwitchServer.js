@@ -29,10 +29,6 @@ function switchdevice( status, data){
 	console.log(data.deviceid);
 	console.log(data.protocol);
 	switch(data.protocol){
-		case "0":
-		case "4":
-			sendUDP(status, data);
-			break;
 		case "1":
 			sendEXEC(status, data);
 			break;
@@ -44,6 +40,10 @@ function switchdevice( status, data){
 			break;
 		case "4":
 			milight(status, data);
+			break;
+		case "5":
+		case "6":
+			sendUDP(status, data);
 			break;
 		default:
 			console.log('FEHLER!!');
@@ -70,22 +70,16 @@ function sendEXEC(status, data){
 function sendUDP(status, data){
 	
 	switch(data.protocol){
-		case "3":
+		case "5":
 			var msg = connair_create_msg_brennenstuhl(status, data);
 			break;
-		case "4":
+		case "6":
 			var msg = connair_create_msg_elro(status, data);
 			break;
 		default:
 			break;
 	}
 	
-	// if(status == "1"){
-			// 					 TXP:0,0,10,5600,350,25,1,3,3,1,1,3,3,1,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,1,1,3,3,1,1,3,3,1,1,3,3,1,1,3,1,3,1,3,3,1,,1,14,;
-		// var msg = new Buffer('TXP:0,0,10,5600,350,25,1,3,3,1,1,3,3,1,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,1,1,3,3,1,1,3,3,1,1,3,3,1,1,3,1,3,1,3,3,1,1,14;');
-	// }else{
-		// var msg = new Buffer('TXP:0,0,10,5600,350,25,1,3,3,1,1,3,3,1,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,1,1,3,3,1,1,3,3,1,1,3,3,1,1,3,3,1,1,3,1,3,1,14;');
-	// }
 	// dgram Klasse für UDP-Verbindungen
 	var client = dgram.createSocket('udp4'); // Neuen Socket zum Client aufbauen
 	client.send(msg, 0, msg.length, connair.port, connair.ip, function(err, bytes) 
