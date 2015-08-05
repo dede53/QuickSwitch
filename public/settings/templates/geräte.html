@@ -4,14 +4,15 @@
         	<!-- <div class="ui-block-a"> -->
         		<div class="jqm-block-content">	
  					<ul>
-						<li ng-repeat="rooms in devicelist">
-							<div ng-repeat="(key, room) in rooms">
+						<li ng-repeat="(key, rooms) in devicelist">
 								<h3>{{key}}</h3>
-								<div ng-repeat="devices in room">
+							<div ng-repeat="devices in rooms">
+								<!-- <div ng-repeat="devices in room"> -->
 									<div class="ui-grid-a">
 										<div class="ui-block-a" style="text-align:left">
 										{{devices.name}}
 										</div>
+										
 										<div class="ui-block-b" style="text-align:right">
 											<div class="box-btn-switch">
 												<a href="#/editDevice/{{devices.deviceid}}" id="btnOn{{devices.deviceid}}" >Bearbeiten</a>
@@ -19,7 +20,7 @@
 											</div>
 										</div>
 									</div>
-								</div>
+								<!-- </div> -->
 							</div>
 						</li>
 						<li>

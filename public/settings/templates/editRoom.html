@@ -11,13 +11,14 @@
 							<div class="ui-block-b" style="text-align:right">
 								<form ng-controller="saveRoomController">
 									<ul>
-										<input type="text" id="id" value="{{editRoom.roomlist.id}}">
+										<input type="hidden" id="id" value="{{editRoom.roomlist.id}}">
 										<li>
 											<label for="name">Name</label>
 											<input type="text" placeholder="Name" ng-model="editRoom.roomlist.name" id="name" value="{{editRoom.roomlist.name}}"/>
 										</li>
 										<li>
 											<button ng-click="saveRoom()">Speichern</button>
+											<button ng-click="abort('/rooms')">Abbrechen</button>
 										</li>
 									</ul>
 								</form>

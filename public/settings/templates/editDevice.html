@@ -5,19 +5,7 @@
         		<div class="jqm-block-content">
         			<h3>{{editDevice.title}}</h3>
  					<ul>
- <!-- 						<li ng-repeat="(f1, zutaten) in devicelist">
-							<div class="ui-grid-a">
-								<div class="ui-block-a" style="text-align:left">
-								{{zutaten.name}}
-								</div>
-									<div class="ui-block-b" style="text-align:right">
-									<div class="box-btn-switch">	
-										<button  id="btnOn{{zutaten.id}}" ng-click='editDevice({"id":zutaten.deviceid,"status":"1"})' >Bearbeiten</button>
-										<button  id="btnOn{{zutaten.id}}" ng-click='switchdevice({"id":zutaten.deviceid,"status":"1"})' >Löschen</button>
-									</div>
-								</div>
-							</div>
-						</li> -->
+
 <script type="text/javascript">
    
 it('should check ng-submit', function() {
@@ -38,60 +26,43 @@ it('should ignore empty strings', function() {
  						<li>
 							<div class="ui-grid-a">
 								<div class="ui-block-a" style="text-align:left">
-								{{editDevice.devicelist.name}}
+								{{editDevice.device.name}}
 								</div>
 								<div class="ui-block-b" style="text-align:right">
 								<ul>
 									<form ng-controller="saveDeviceController">
-									<input type="hidden" id="deviceid" value="{{editDevice.devicelist.deviceid}}">
+									<input type="hidden" id="deviceid" value="{{editDevice.device.deviceid}}">
 									<li>
 										<label for="name">Name</label>
-										<input type="text" placeholder="Name" ng-model="editDevice.devicelist.name" id="name" value="{{editDevice.devicelist.name}}"/>
+										<input type="text" placeholder="Name" ng-model="editDevice.device.name" id="name" value="{{editDevice.device.name}}"/>
 									</li>
 									<li>
 										<label for="buttonLabelOn">Buttontitel an</label>
-										<input type="text" placeholder="Name/Anschaltbutton" ng-model="editDevice.devicelist.buttonLabelOn" id="buttonLabelOn" value="{{editDevice.devicelist.buttonLabelOn}}"/>
+										<input type="text" placeholder="Name/Anschaltbutton" ng-model="editDevice.device.buttonLabelOn" id="buttonLabelOn" value="{{editDevice.device.buttonLabelOn}}"/>
 									</li>
 									<li>
 										<label for="buttonLabelOff">Buttontitel aus</label>
-										<input type="text" placeholder="Name/Ausschaltbutton" ng-model="editDevice.devicelist.buttonLabelOff" id="buttonLabelOff" value="{{editDevice.devicelist.buttonLabelOff}}"/>
+										<input type="text" placeholder="Name/Ausschaltbutton" ng-model="editDevice.device.buttonLabelOff" id="buttonLabelOff" value="{{editDevice.device.buttonLabelOff}}"/>
 									</li>
 									<li>
 										<label for="CodeOn">Einschaltcode</label>
-										<input type="text" placeholder="On-Code/Masterdip" ng-model="editDevice.devicelist.CodeOn" id="CodeOn" value="{{editDevice.devicelist.CodeOn}}"/>
+										<input type="text" placeholder="On-Code/Masterdip" ng-model="editDevice.device.CodeOn" id="CodeOn" value="{{editDevice.device.CodeOn}}"/>
 									</li>
 									<li>
 										<label for="CodeOff">Ausschaltcode</label>
-										<input type="text" placeholder="Off-Code/Slavedip" ng-model="editDevice.devicelist.CodeOff" id="CodeOff" value="{{editDevice.devicelist.CodeOff}}"/>
+										<input type="text" placeholder="Off-Code/Slavedip" ng-model="editDevice.device.CodeOff" id="CodeOff" value="{{editDevice.device.CodeOff}}"/>
 									</li>
 									<li>
 										<label for="room">Raum</label>
-										<input type="text" ng-model="editDevice.devicelist.room" id="room" value="{{editDevice.devicelist.room}}"/>
-									</li>
-									<li>
-										<p>
-											<!-- {{selectedOption}} -->
-											<!-- {{options}} -->
-											<!-- {{editDevice.devicelist.protocol}} -->
-										</p>
+										<input type="text" ng-model="editDevice.device.room" id="room" value="{{editDevice.device.room}}"/>
 									</li>
 									<li>
 										<label for="protocol">Protocol</label>
-										
-										<!-- <select 
-                ng-model="options.SelectedOption"                 
-                ng-options="choice.Name for choice in options.Options track by choice.ID"
-				id="protocol"
-				></select> -->
-				
-										    <select
-											ng-model="editDevice.devicelist.protocol"
-											ng-options="value.name for value in options track by value.id"></select>
-										<!-- <select  ng-options="o.name for o in options"  data-ng-model="protocol" id="protocol" ></select> -->
-										<!-- <select  ng-options="o.name for o in options" data-ng-model="editDevice.devicelist.protocol" id="protocol" >{{editDevice.devicelist.protocol}}</select> -->
+										<select ng-model="editDevice.device.protocol" ng-options="obj.id as obj.name for obj in options"></select>
 									</li>
 									<li>
 										<button ng-click="submitnew()">Speichern</button>
+										<button ng-click="abort('/devices')">Abbrechen</button>
 									</li>
 									</form>
 								</ul>

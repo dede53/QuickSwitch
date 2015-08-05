@@ -1,4 +1,4 @@
-﻿var app = angular.module('sampleApp', ['ngRoute','ngTouch',"highcharts-ng"]);
+﻿var app = angular.module('sampleApp', ['ngRoute','ngTouch',"highcharts-ng",'as.sortable']);
 
 app.config(['$routeProvider', function($routeProvider) {
 	$routeProvider.
@@ -70,17 +70,21 @@ app.controller('favoritenController',  function($scope, $rootScope, socket) {
 });
 
 app.controller('userController', function($scope, $rootScope, socket){
-	
-	socket.emit('getUser');
-	
-	socket.on('User',function(data){
+
+	socket.emit('newuser');
+	socket.on('newuser', function(data) {
 		$rootScope.users = data;
 	});
+	
+	// socket.emit('getUser');
+	// socket.on('User',function(data){
+		// $rootScope.users = data;
+	// });
+	
 	$scope.deleteUser = function(data) {
 		socket.emit('deleteUser', {"id":data.id});	
 	}
 	socket.on('deletedUser', function(data) {
-		console.log(data);
 		$rootScope.users = data;
 	});
 });
@@ -88,25 +92,32 @@ app.controller('editUserController', function($scope, $rootScope, socket, $route
 	/***********************************************
 	*	Daten anfordern
 	***********************************************/
+	socket.emit('devices');
 	if(!$routeParams.id){
 			$scope.editUser = {
-				title: "Hinzufügen"
+				title: "Hinzufügen",
+				userlist: {
+					name: "",
+					favoritDevices: []
+				}
 			}
 	}else{
 		socket.emit('user', {"id":  $routeParams.id});
 
+	}
 		/***********************************************
 		*	Daten empfangen, Scope zuordnen
 		***********************************************/
 		socket.on('user', function(data) {
-			console.log(data);
+			
 			
 			if(data.constructor === Array){
-
+				
 				$scope.editUser = {
 					title: "Bearbeiten",
 					userlist: data[0]
 				}
+
 			}else{
 				$scope.editUser = {
 					title: "Achtung: Fehler!",
@@ -116,7 +127,57 @@ app.controller('editUserController', function($scope, $rootScope, socket, $route
 				}
 			}
 		});
-	}
+		socket.on('devices', function(data) {
+			var devices = new Array;
+			
+			var arr = Object.keys(data).map(function(k) { return data[k] });
+			arr.forEach(function(arr){
+				var ar = Object.keys(arr).map(function(k) { return arr[k] });
+				ar.forEach(function(arr){
+					if( $routeParams.id && inArray(arr.deviceid , JSON.parse($scope.editUser.userlist.favoritDevices)) ){
+						var haystack = JSON.parse($scope.editUser.userlist.favoritDevices);
+						var length = haystack.length;
+						for(var i = 0; i < length; i++) {
+							if(haystack[i] == arr.deviceid){
+								console.log(arr.name);
+								console.log(i);
+								arr.selected = true;
+								devices.splice(i,0,arr);
+							};
+						}
+						
+					}else{
+						arr.selected = false;
+						devices.push(arr);
+					}
+				});
+			});
+			$scope.devicelist = devices;
+
+			// helper method to get selected fruits
+			$scope.selectedFruits = function selectedFruits() {
+				return filterFilter($scope.devicelist, { selected: true });
+			};
+			
+			// watch fruits for changes
+			$scope.$watch('devicelist|filter:{selected:true}', function (nv) {
+				$scope.editUser.userlist.favoritDevices = nv.map(function (device) {
+					return device.deviceid;
+				});
+			}, true);
+		});
+
+
+  
+	$scope.dragControlListeners = {
+		accept: function (sourceItemHandleScope, destSortableScope) {return boolean},//override to determine drag is allowed or not. default is true.
+		itemMoved: function (event) {
+			},
+		orderChanged: function(event) {
+			},
+		containment: '#board'
+		//optional param.
+	};
 });
 app.controller('saveUserController', function($scope, socket, $location) {
 		$scope.saveUser = function() {
@@ -162,27 +223,27 @@ app.controller('editDeviceController',  function($scope, $rootScope, socket, $ro
 		*	Daten empfangen, Scope zuordnen
 		***********************************************/
 		socket.on('device', function(data) {
-			// console.log(data);
-			
 			if(data.constructor === Array){
 
 				$scope.editDevice = {
 					title: "Bearbeiten",
-					devicelist: data[0]
+					device: data[0]
 				}
-				var protocolOptions = $scope.options[data[0].protocol];
-				$scope.editDevice.devicelist.protocol = protocolOptions;
+				// Array fängt bei 0 an, Protocolle erst bei 1
+				var protocolid = data[0].protocol - 1;
+				var protocolOptions = $scope.options[protocolid];
+				$scope.editDevice.device.protocol = protocolOptions.id;
 			}else{
 				$scope.editDevice = {
 					title: "Achtung: Fehler!",
-					devicelist:{
+					device:{
 						name: data
 					}
 				}
 			}
 		});
 	}
-	
+	// Maybe in die Datenbank auslagern??
 	$scope.options = 	[
 				{
 					name: "Shell/exec",
@@ -207,18 +268,19 @@ app.controller('editDeviceController',  function($scope, $rootScope, socket, $ro
 				{ 
 					name: "Connair - Elro",
 					id: 6
+				},
+				{ 
+					name: "Connair - RAW-Code",
+					id: 7
 				}
 			];
 });
-app.controller('saveDeviceController', function($scope, socket) {
+app.controller('saveDeviceController', function($scope, socket, $location) {
 		$scope.submitnew = function() {
 			// Validierung!!
-			socket.emit('saveDevice', $scope.editDevice.devicelist);
+			socket.emit('saveDevice', $scope.editDevice.device);
 			$location.url("/devices");
 		};
-		socket.on('savedDevice', function(data){
-			alert("Antwort:" + data);
-		});
 });
 
 app.controller('roomController',  function($scope, $rootScope, socket) {
@@ -353,13 +415,11 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
 
 app.controller("AppController", function($scope, $location, $rootScope, socket){
 	
-	socket.emit('newuser');
-	
-	socket.on('newuser', function(data) {
+
+	$scope.abort = function(data) {
 		console.log(data);
-		$rootScope.users = data;
-	});
-	
+		$location.url(data);
+	};
 	// Einstellungen für das Menu:
 	// Beim Starten geöffnet sein?
 	$scope.showmenu=false;
@@ -377,7 +437,13 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
 
 
 
-
+function inArray(needle, haystack) {
+    var length = haystack.length;
+    for(var i = 0; i < length; i++) {
+        if(haystack[i] == needle) return true;
+    }
+    return false;
+}
 
 
 

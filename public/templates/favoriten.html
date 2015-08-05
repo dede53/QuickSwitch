@@ -7,23 +7,37 @@
         			<h3>Favoriten</h3>
  					<!-- <ul data-role="listview" data-inset="false"> -->
  					<ul>
-						<li ng-repeat="rooms in favoritDevices">
-							<div ng-repeat="room in rooms">
-								<div ng-repeat="devices in room	">
-									<div class="ui-grid-a">
-										<div class="ui-block-a" style="text-align:left">
-										{{devices.name}}
-										</div>
-										
-											<div class="ui-block-b" style="text-align:right">
-											<div class="box-btn-switch">	
-												<button  id="btnOn{{devices.deviceid}}"  ng-click='switchdevice({"id":devices.deviceid,"status":"1"})' >{{devices.buttonLabelOn}}</button>
-												<button id="btnOff{{devices.deviceid}}" ng-click='switchdevice({"id":devices.deviceid,"status":"0"})' >{{devices.buttonLabelOff}}</button>
-											</div>
+						<li ng-repeat="devices in favoritDevices">
+								<div class="ui-grid-a">
+									<div class="ui-block-a" style="text-align:left">
+									{{devices.name}}
+									</div>
+									
+									<div class="ui-block-b" style="text-align:right">
+										<div class="box-btn-switch">
+											<button class="btnOn" id="btnOn{{devices.deviceid}}" ng-click='switchdevice({"id":devices.deviceid,"status":"1"})' >
+												<div ng-if = "devices.status == 0 ">
+													<input type="checkbox"></input>
+													{{devices.buttonLabelOn}}
+												</div>
+												<div ng-if = "devices.status == 1 ">
+													<input type="checkbox" checked="checked"></input>
+													{{devices.buttonLabelOn}}
+												</div>
+											</button>
+											<button class="btnOff" id="btnOff{{devices.deviceid}}" ng-click='switchdevice({"id":devices.deviceid,"status":"0"})'>
+												<div ng-if = "devices.status == 0 ">
+													<input type="checkbox" checked="checked" ></input>
+													{{devices.buttonLabelOff}}
+												</div>
+												<div ng-if = "devices.status == 1 ">
+													<input type="checkbox"></input>
+													{{devices.buttonLabelOff}}
+												</div>
+											</button>
 										</div>
 									</div>
 								</div>
-							</div>
 						</li>
 					</ul>
         		</div>
@@ -36,10 +50,51 @@
 							<p>{{device.name}} ({{device.room}})</p>
 						</li>
 					</ul>
-					<button ng-click='switchalldevices({"status":"0"})'>Alle aus</button>
-					<button ng-click='switchalldevices({"status":"1"})'>Alle ein</button>
+					<button class="btnOn" ng-click='switchalldevices({"status":"1"})'>Alle ein</button>
+					<button class="btnOff" ng-click='switchalldevices({"status":"0"})'>Alle aus</button>
         		</div>
         	</div>        	
+        	<div class="ui-block-a">
+        		<div class="jqm-block-content">
+        			<h3>Geteilte Nachrichten</h3>
+					<ul id="messageBox" style="height:300px; overflow:auto" >
+					
+						<li ng-show="moreMessagesAvible">
+							<button ng-click = "loadOldMessages()">ältere Laden</button>
+						</li>
+						<li ng-hide="moreMessagesAvible">
+							<p id="italic">Keine weiteren Nachrichten Verfügbar!</p>
+						</li>
+						<li ng-repeat="message in sharedMessages">
+							<div ng-if="message.type == '1'">
+								<!-- <p>{{message.time}} {{message.author}}: {{message.message}}</p> -->
+								<p id="message{{message.time}}">
+									<span id="italic">{{message.time | date:'HH:mm'}}</span>  {{message.author}}: {{message.message}}
+								</p>
+							</div>
+							<div ng-if="message.type == '2'">
+								<p>
+									<span id="italic">
+									{{message.time | date:'HH:mm'}}
+									</span>
+									{{message.author}}: 
+									<a target-blank ng-href="{{message.message}}">{{message.message}}</a>
+								</p>
+							</div>
+						</li>
+					</ul>
+						<li>
+							<form ng-controller="sendNewMessage">
+								<input type="text" 		id="message" 	ng-model="link.message" placeholder="Neue Nachricht eingeben" ></input>
+								<select id="type" ng-model="link.type">
+									<option value="1" >Text</option>
+									<option value="2" >Link</option>
+								</select>
+								<button ng-click="sendMessage()">Senden!</button>
+							</form>
+						</li>
+        		</div>
+        	</div>       	
         	<div class="ui-block-a">
         		<div class="jqm-block-content">
         			<h3>Wer ist wo?</h3>

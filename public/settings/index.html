@@ -7,9 +7,9 @@
 		<title>SmartHome</title>
 		<link rel="shortcut icon" href="favicon.ico"></link>
 		<link rel='stylesheet' type='text/css' href='demo.css' />
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
+		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700"></link>
 	
-		<link rel="stylesheet" href="_assets/css/jqm-demos.css"></link>
+		<!-- <link rel="stylesheet" href="_assets/css/jqm-demos.css"></link> -->
 		<!-- Lokales CSS -->
 		<style type="text/css">
 			.li {
@@ -49,7 +49,6 @@
   </head>
 <body ng-app="sampleApp" ng-controller="AppController">
 	<div>
-
 		<div class="ui-content">
 			<button ng-click="toggleMenu()" class="menubotton"></button>
 			<div ng-view role="main">
@@ -92,6 +91,8 @@
 	<script src="http://code.highcharts.com/adapters/standalone-framework.js"></script>
     <script src="http://code.highcharts.com/stock/highstock.src.js"></script>
     <script src="../highcharts-ng.js"></script>
+	<script type="text/javascript" src="../ng-sortable.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../ng-sortable.min.css"></link>
 
   </body>
 </html>

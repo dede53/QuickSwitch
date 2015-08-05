@@ -4,24 +4,23 @@
         	<!-- <div class="ui-block-a"> -->
         		<div class="jqm-block-content">
  					<ul>
- 						<li ng-repeat="rooms in roomlist">
-							<div ng-repeat="(key, room) in rooms">
-								<h3>{{key}}</h3>
-								<div ng-repeat="devices in room">
+						<h3>Räume</h3>
+						<li ng-repeat="rooms in roomlist">
+							<!-- <div ng-repeat="devices in rooms"> -->
+								<!-- <div ng-repeat="devices in room"> -->
 									<div class="ui-grid-a">
 										<div class="ui-block-a" style="text-align:left">
-										{{devices.name}}
+										{{rooms.name}}
 										</div>
-										
-											<div class="ui-block-b" style="text-align:right">
-											<div class="box-btn-switch">	
-												<button id="btnOn{{devices.id}}"  ng-click='switchdevice({"id":devices.deviceid,"status":"1"})' >{{devices.buttonLabelOn}}</button>
-												<button id="btnOff{{devices.id}}" ng-click='switchdevice({"id":devices.deviceid,"status":"0"})' >{{devices.buttonLabelOff}}</button>
+										<div class="ui-block-b" >
+											<div class="box-btn-switch" style="text-align:right">
+												<button class="btnOn" id="btnOn{{devices.deviceid}}" ng-click='switchroom({"room":rooms,"status":"1"})' >An</button>
+												<button class="btnOff" id="btnOff{{devices.deviceid}}" ng-click='switchroom({"room":rooms,"status":"0"})' >Aus</button>
 											</div>
 										</div>
 									</div>
-								</div>
-							</div>
+								<!-- </div> -->
+							<!-- </div> -->
 						</li>
 					</ul>
         		</div>

@@ -58,6 +58,9 @@ app.controller('favoritenController',  function($scope, $rootScope, socket) {
 	// socket.on('Sensorvalues', function(data) {
 		// $rootScope.temperature = data;
 	// });
+	$scope.loadOldMessages = function(){
+		socket.emit('loadOldMessages', $scope.sharedMessages[0].time);
+	}
 	
 	$scope.switchdevice = function(data) {
 		socket.emit('switchdevice', {"id":data.id,"status":data.status});
@@ -65,6 +68,12 @@ app.controller('favoritenController',  function($scope, $rootScope, socket) {
 	$scope.switchalldevices = function(data) {
 		socket.emit('switchalldevices', {"status":data.status});
 	}
+	$scope.link = {};
+	$scope.link.type = "1";
+	
+	socket.on('switchDevice', function(data) {
+		$rootScope.favoritDevices[data.device.deviceid].status = data.status;
+	});
 });
 
 app.controller('devicesController',  function($scope, $rootScope, socket) {
@@ -94,6 +103,14 @@ app.controller('devicesController',  function($scope, $rootScope, socket) {
 	$scope.switchdevice = function(data) {
 		socket.emit('switchdevice', {"id":data.id,"status":data.status});
 	}
+	socket.on('switchDevice', function(data) {
+		$rootScope.devicelist[data.device.Raum][data.device.deviceid].status = data.status;
+	});
+	// socket.on('switchRoom', function(data) {
+		// data.devices.forEach(function(dev){
+			// $scope.devicelist[dev.Raum][dev.deviceid].status = data.status;
+		// });
+	// });
 	
 });
 
@@ -109,12 +126,12 @@ app.controller('roomController',  function($scope, $rootScope, socket) {
 	/***********************************************
 	*	Daten anfordern
 	***********************************************/
-	socket.emit('devices');
+	socket.emit('rooms');
 
 	/***********************************************
 	*	Daten empfangen, Scope zuordnen
 	***********************************************/
-	socket.on('devices', function(data) {
+	socket.on('rooms', function(data) {
 		$rootScope.roomlist = data;
 	});
 	
@@ -123,6 +140,10 @@ app.controller('roomController',  function($scope, $rootScope, socket) {
 	***********************************************/
 	$scope.switchdevice = function(data) {
 		socket.emit('switchdevice', {"id":data.id,"status":data.status});
+	}
+	$scope.switchroom = function(data) {
+		// console.log(data);
+		socket.emit('switchRoom', data);
 	}
 	
 });
@@ -342,9 +363,28 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
 	
 });
 
+app.controller('sendNewMessage', function($scope, socket) {
+		$scope.sendMessage = function() {
+			// Validierung!!
+			// console.log($scope.link);
+			// console.log($scope.activeUser);
+			$scope.linkMessage = {
+				author: $scope.activeUser.name,
+				message: $scope.link.message,
+				type: $scope.link.type
+			}
+			$scope.link.message = "";
+			socket.emit('newLinkMessage', $scope.linkMessage);
+			
+		};
+
+});
+
 app.controller("AppController", function($scope, $location, $rootScope, socket){
 	
 	// $rootScope.instruction = [];
+	$scope.sharedMessages = new Array;
+	$scope.moreMessagesAvible = true;
 	// $rootScope.instruction.css = "visibility: hidden;position: absolute;left: 0px;top: 0px;width:100%;height:100%;text-align:center;z-index: 1000; ";
 	// $rootScope.instruction.css2 = " width:200px; margin: 0px 100px auto auto; background-color: #fff; border:1px solid #000; padding:15px; text-align:center;";
 	// $rootScope.instruction.text="Hier kann ein Benutzer ausgewählt werden:";
@@ -373,6 +413,7 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
     // }
 	socket.emit('newuser');
 	
+	
 	socket.on('newuser', function(data) {
 		$scope.values = data;
 	});
@@ -383,14 +424,46 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
 	
 	$scope.setUser = function() {
 		socket.emit('favoritDevices', $scope.activeUser);
-		// console.log($scope.activeUser);
 		setCookie("username", JSON.stringify($scope.activeUser), 365);
 	}
-	// $scope.string = true;
+	
 	$scope.activedeviceslist = [];
 	socket.on('activedevices', function(data){
 		$scope.activedeviceslist = data.activedevices;
 	});
+	
+
+	socket.on('oldMessages', function(data){
+		console.log(data);
+		$scope.moreMessagesAvible = data.moreMessagesAvible;
+		if(data.moreMessagesAvible == true){
+			if(data.messages == ""){
+				socket.emit('loadOldMessages', data.timestamp - (1000 * 60 * 60 * 24));
+			}else{
+				data.messages.forEach(function(message){
+					$scope.sharedMessages.splice(0, 0, message);
+				});
+			}
+		}
+	});
+	socket.on('newLinkMessage', function(data){
+		$scope.sharedMessages.push(data);
+	});
+	
+
+
+	
+	// socket.on('switchRoom', function(data) {
+		// data.devices.forEach(function(dev){
+			// console.log(dev);
+			// // $scope.activedeviceslist[dev.room][dev.deviceid].status = 0;
+			// $scope.devicelist[dev.Raum][dev.deviceid].status = 0;
+		// });
+		// // console.log(data);
+		// // console.log(data.devices);
+		
+		// // $rootScope.favoritDevices[data.device.deviceid].status = data.status;
+	// });
 	
 	// Einstellungen für das Menu:
 	// Beim Starten geöffnet sein?
@@ -404,6 +477,23 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
 	}
 });
 
+app.directive('targetBlank', function() {
+  return {
+    compile: function(element) {
+      var elems = (element.prop("tagName") === 'A') ? element : element.find('a');
+      elems.attr("target", "_blank");
+    }
+  };
+});
+
+app.directive("scrollBottom", function(){
+    return {
+        link: function(scope, element, attr){
+            var $id= $("#" + attr.scrollBottom);
+            $id.scrollTop($id[0].scrollHeight);
+        }
+    }
+});
 
 function setCookie(cname, cvalue, exdays) {
     var d = new Date();
@@ -423,16 +513,16 @@ function getCookie(cname) {
     return "";
 }
 
-function checkCookie() {
-    var user = getCookie("username");
-    if (user != "") {
-        alert("Welcome again " + user);
-    } else {
-        user = prompt("Please enter your name:", "");
-        if (user != "" && user != null) {
-            setCookie("username", user, 365);
-        }
-    }
-}
+// function checkCookie() {
+    // var user = getCookie("username");
+    // if (user != "") {
+        // alert("Welcome again " + user);
+    // } else {
+        // user = prompt("Please enter your name:", "");
+        // if (user != "" && user != null) {
+            // setCookie("username", user, 365);
+        // }
+    // }
+// }
 
 
