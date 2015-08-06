@@ -94,7 +94,29 @@
 							</form>
 						</li>
         		</div>
-        	</div>       	
+        	</div>
+        	<div class="ui-block-b">
+        		<div class="jqm-block-content">
+        			<h3>Countdowns</h3>
+					<ul>
+						<li ng-repeat="countdown in activeCountdowns">
+							<p>{{countdown.name}} {{countdown.switchstatus}} um {{countdown.time | date:'HH:mm'}}</p>
+						</li>
+						<li>
+						{{devices}}
+							<!-- <form ng-controller="newCountdown"> -->
+								<input type="text" 		id="message" 	ng-model="link.message" placeholder="Neue Nachricht eingeben" ></input>
+								<select id="type" ng-model="devicelist">
+								
+									<option value="1" >Text</option>
+									<option value="2" >Link</option>
+								</select>
+								<button ng-click="sendMessage()">Senden!</button>
+							<!-- </form> -->
+						</li>
+					</ul>
+        		</div>
+        	</div> 			
         	<div class="ui-block-a">
         		<div class="jqm-block-content">
         			<h3>Wer ist wo?</h3>

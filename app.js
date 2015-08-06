@@ -161,10 +161,14 @@ app.io.route('newuser',function(req, res){
 		}
 	});
 	var now = Math.floor(Date.parse(new Date));
-	console.log(now);
 	loadOldMessages( now, function(data){
-		console.log("io.route newUser");
 		req.io.emit('oldMessages', data);
+	});
+	getCountdowns(req, res, function(data){
+		req.io.emit('countdowns', data);
+	});
+	getDevices(req, res, function(data){
+		req.io.emit('devices', data);
 	});
 });
 app.io.route('saveDevice', function(req, res){
@@ -240,7 +244,6 @@ app.io.route('switchdevice', function(req, res){
 		}
 	});
 });
-
 app.io.route('switchRoom', function(req, res){
 	var room = req.data.room;
 	var status = req.data.status;
@@ -248,6 +251,12 @@ app.io.route('switchRoom', function(req, res){
 		if(err != 200){
 			console.log("Raum konnte nicht geschaltet werden");
 		}
+	});
+});
+
+app.io.route('countdowns', function(req, res){
+	getCountdowns(req, res, function(data){
+		req.io.emit('countdowns', data);
 	});
 });
 
@@ -356,8 +365,6 @@ app.io.route('newLinkMessage', function(req){
 });
 app.io.route('loadOldMessages', function(req){
 	loadOldMessages(req.data, function(data){
-		console.log("io.route loadOldMessages");
-		// console.log(data);
 		req.io.emit('oldMessages', data);
 	});
 });
@@ -564,6 +571,17 @@ function saveEditUser(data, req, res, callback) {
 	callback(201);
 }
 
+function getCountdowns(req,res,callback){
+	var query = "SELECT countdowns.id, countdowntypen.type, countdowns.switchid, countdowns.time, countdowns.status AS switchstatus, devices.* FROM countdowns, countdowntypen, devices WHERE countdowns.switchid = devices.deviceid AND countdowns.id = countdowntypen.id ;";
+	db.all(query, function(err, row){
+		if(err){
+			console.log(err);
+		}else{
+			console.log(row);
+			callback(row);
+		}
+	});
+}
 
 function getDevices(req, res, callback) {
 	var query = "SELECT * FROM rooms;";

@@ -73,6 +73,10 @@ app.controller('favoritenController',  function($scope, $rootScope, socket) {
 	
 	socket.on('switchDevice', function(data) {
 		$rootScope.favoritDevices[data.device.deviceid].status = data.status;
+	});	
+	socket.on('devices', function(data) {
+		$scope.devices = data;
+		console.log(data);
 	});
 });
 
@@ -412,10 +416,16 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
         // }
     // }
 	socket.emit('newuser');
+	// socket.emit('countdowns');
 	
 	
 	socket.on('newuser', function(data) {
 		$scope.values = data;
+	});
+	
+	socket.on('countdowns', function(data){
+		console.log(data);
+		$scope.activeCountdowns = data;
 	});
 	
 	socket.on('favoritDevices', function(data) {
@@ -434,7 +444,6 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
 	
 
 	socket.on('oldMessages', function(data){
-		console.log(data);
 		$scope.moreMessagesAvible = data.moreMessagesAvible;
 		if(data.moreMessagesAvible == true){
 			if(data.messages == ""){
@@ -512,17 +521,5 @@ function getCookie(cname) {
     }
     return "";
 }
-
-// function checkCookie() {
-    // var user = getCookie("username");
-    // if (user != "") {
-        // alert("Welcome again " + user);
-    // } else {
-        // user = prompt("Please enter your name:", "");
-        // if (user != "" && user != null) {
-            // setCookie("username", user, 365);
-        // }
-    // }
-// }
 
 
