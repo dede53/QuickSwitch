@@ -1,4 +1,4 @@
-﻿<div jqm>
+<div jqm>
 
 		<h1>SmartHome</h1>
         <div class="ui-grid-a ui-responsive">
@@ -8,12 +8,17 @@
  					<!-- <ul data-role="listview" data-inset="false"> -->
  					<ul>
 						<li ng-repeat="devices in favoritDevices">
-								<div class="ui-grid-a">
-									<div class="ui-block-a" style="text-align:left">
-									{{devices.name}}
+							<div class="ui-grid-a">
+								<div class="ui-block-a" style="text-align:left">
+								{{devices.name}}
+								</div>
+									<div ng-if="devices.protocol == 8" class="ui-block-b" style="text-align:right">
+										<div class="box-btn-switch">
+											<a href=""><</a>{{devices.status}}<input type="range" min="{{devices.buttonLabelOn}}" max="{{devices.buttonLabelOff}}" ng-model="devices.status" ng-change='switchdeviceSlider({"id":devices.deviceid})'></input>
+											<a href="">></a>
+										</div>
 									</div>
-									
-									<div class="ui-block-b" style="text-align:right">
+									<div ng-if="devices.protocol != 8 " class="ui-block-b" style="text-align:right">
 										<div class="box-btn-switch">
 											<button class="btnOn" id="btnOn{{devices.deviceid}}" ng-click='switchdevice({"id":devices.deviceid,"status":"1"})' >
 												<div ng-if = "devices.status == 0 ">
@@ -37,7 +42,10 @@
 											</button>
 										</div>
 									</div>
+								<!--
 								</div>
+							-->
+							</div>
 						</li>
 					</ul>
         		</div>
@@ -56,18 +64,18 @@
         	</div>        	
         	<div class="ui-block-a">
         		<div class="jqm-block-content">
-        			<h3>Geteilte Nachrichten</h3>
+        			<h3>Geteilte Nachrichten </h3>
 					<ul id="messageBox" style="height:300px; overflow:auto" >
 					
 						<li ng-show="moreMessagesAvible">
 							<button ng-click = "loadOldMessages()">ältere Laden</button>
+							<p>{{sharedMessages[0].time | date:'d. MMMM yyyy'}}</p>
 						</li>
 						<li ng-hide="moreMessagesAvible">
 							<p id="italic">Keine weiteren Nachrichten Verfügbar!</p>
 						</li>
 						<li ng-repeat="message in sharedMessages">
 							<div ng-if="message.type == '1'">
-								<!-- <p>{{message.time}} {{message.author}}: {{message.message}}</p> -->
 								<p id="message{{message.time}}">
 									<span id="italic">{{message.time | date:'HH:mm'}}</span>  {{message.author}}: {{message.message}}
 								</p>
@@ -98,25 +106,36 @@
         	<div class="ui-block-b">
         		<div class="jqm-block-content">
         			<h3>Countdowns</h3>
-					<ul>
+					<ul style=" overflow:auto" >
 						<li ng-repeat="countdown in activeCountdowns">
-							<p>{{countdown.name}} {{countdown.switchstatus}} um {{countdown.time | date:'HH:mm'}}</p>
-						</li>
-						<li>
-						{{devices}}
-							<!-- <form ng-controller="newCountdown"> -->
-								<input type="text" 		id="message" 	ng-model="link.message" placeholder="Neue Nachricht eingeben" ></input>
-								<select id="type" ng-model="devicelist">
-								
-									<option value="1" >Text</option>
-									<option value="2" >Link</option>
-								</select>
-								<button ng-click="sendMessage()">Senden!</button>
-							<!-- </form> -->
+							<p>{{countdown.device.name}} ({{countdown.device.Raum}}) {{countdown.switchstatus}} um {{countdown.time | date:'HH:mm'}}
+								<button ng-click='deleteCountdown({"id":countdown.id})' >X</button>
+							</p>
 						</li>
 					</ul>
+						<form ng-controller="newCountdowntimer">
+							<ul style="text-align:right;" >
+								<li>
+										<label for="device">Gerät</label>
+										<select id="device" ng-model="newCountdowntimer.device" ng-options="obj.name  group by obj.Raum for obj in devices" required="required"></select>
+								</li>
+								<li>
+										<label for="status">Status</label>
+										<input id="status" type="radio" name="status" value="1" ng-model="newCountdowntimer.switchstatus">AN</input>
+										<input id="status" type="radio" name="status" value="0" ng-model="newCountdowntimer.switchstatus">AUS</input>
+								</li>
+								<li>
+										<label for="minutes">Minuten</label>
+										<input id="minutes" type="number" min="1" max="50"		ng-model="newCountdowntimer.time">
+								</li>
+								<li>
+										<button ng-click="newCountdown()">Senden!</button>
+								</li>
+							</ul>
+						</form>
         		</div>
-        	</div> 			
+        	</div> 		<!--
+								-->	
         	<div class="ui-block-a">
         		<div class="jqm-block-content">
         			<h3>Wer ist wo?</h3>

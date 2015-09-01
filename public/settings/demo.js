@@ -92,7 +92,7 @@ app.controller('editUserController', function($scope, $rootScope, socket, $route
 	/***********************************************
 	*	Daten anfordern
 	***********************************************/
-	socket.emit('devices');
+	socket.emit('devices', {"type":"object"});
 	if(!$routeParams.id){
 			$scope.editUser = {
 				title: "Hinzufügen",
@@ -191,7 +191,8 @@ app.controller('saveUserController', function($scope, socket, $location) {
 });
 
 app.controller('devicesController',  function($scope, $rootScope, socket) {
-	socket.emit('devices', {"sort":"devices"});
+	//socket.emit('devices', {"sort":"devices"});
+	socket.emit('devices', {"type":"object"});
 	
 	socket.on('devices', function(data) {
 		$rootScope.devicelist = data;
@@ -205,44 +206,11 @@ app.controller('devicesController',  function($scope, $rootScope, socket) {
 	});
 });
 app.controller('editDeviceController',  function($scope, $rootScope, socket, $routeParams) {
-	/***********************************************
-	*	Daten anfordern
-	***********************************************/
-	if(!$routeParams.id){
-			$scope.editDevice = {
-				title: "Hinzufügen",
-				devicelist: {
-					buttonLabelOn: "An",
-					buttonLabelOff: "Aus"
-				}
-			}
-	}else{
-		socket.emit('device', {"id":  $routeParams.id});
+	socket.emit('rooms');
+	socket.on('rooms', function(rooms) {
+		$scope.rooms = rooms;
+	});
 
-		/***********************************************
-		*	Daten empfangen, Scope zuordnen
-		***********************************************/
-		socket.on('device', function(data) {
-			if(data.constructor === Array){
-
-				$scope.editDevice = {
-					title: "Bearbeiten",
-					device: data[0]
-				}
-				// Array fängt bei 0 an, Protocolle erst bei 1
-				var protocolid = data[0].protocol - 1;
-				var protocolOptions = $scope.options[protocolid];
-				$scope.editDevice.device.protocol = protocolOptions.id;
-			}else{
-				$scope.editDevice = {
-					title: "Achtung: Fehler!",
-					device:{
-						name: data
-					}
-				}
-			}
-		});
-	}
 	// Maybe in die Datenbank auslagern??
 	$scope.options = 	[
 				{
@@ -272,8 +240,56 @@ app.controller('editDeviceController',  function($scope, $rootScope, socket, $ro
 				{ 
 					name: "Connair - RAW-Code",
 					id: 7
+				},
+				{ 
+					name: "GPIO Fade",
+					id: 8
 				}
 			];
+	/***********************************************
+	*	Daten anfordern
+	***********************************************/
+	if(!$routeParams.id){
+			$scope.editDevice = {
+				title: "Hinzufügen",
+				device: {
+					buttonLabelOn: "An",
+					buttonLabelOff: "Aus",
+					status: "0"
+				}
+			}
+	}else{
+		socket.emit('device', {"id":  $routeParams.id});
+
+		/***********************************************
+		*	Daten empfangen, Scope zuordnen
+		***********************************************/
+		socket.on('device', function(data) {
+			if(data.constructor === Array){
+
+				$scope.editDevice = {
+					title: "Bearbeiten",
+					device: data[0]
+				}
+				// Array fängt bei 0 an, Protocolle erst bei 1
+				var protocolid = data[0].protocol - 1;
+				var protocolOptions = $scope.options[protocolid];
+				$scope.editDevice.device.protocol = protocolOptions.id;
+
+				var roomid = data[0].roomid - 1;
+				var roomOptions = $scope.rooms[roomid];
+				$scope.editDevice.device.room = roomOptions.id;
+
+			}else{
+				$scope.editDevice = {
+					title: "Achtung: Fehler!",
+					device:{
+						name: data
+					}
+				}
+			}
+		});
+	}
 });
 app.controller('saveDeviceController', function($scope, socket, $location) {
 		$scope.submitnew = function() {

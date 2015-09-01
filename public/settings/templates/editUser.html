@@ -16,20 +16,22 @@
 											<label for="name">Name</label>
 											<input type="text" placeholder="Name" ng-model="editUser.userlist.name" id="name" value="{{editUser.userlist.name}}"/>
 										</li>
+									<!--
 										<li>
 											<label for="favoritDevices">Gerätefavoriten</label>
 											<input type="text" ng-model="editUser.userlist.favoritDevices" id="favoritDevices" value="{{editUser.userlist.favoritDevices}}"/>
 										</li>
+									-->
 										<div data-as-sortable="board.dragControlListeners"  data-ng-model="devicelist">
 											<li data-ng-repeat="ite in devicelist" data-as-sortable-item>
 												<div data-as-sortable-item-handle>
-															{{ite.name}} ({{ite.Raum}})
-															<input
-																type="checkbox"
-																name="selectedFruits[]"
-																value="{{ite.name}}"
-																ng-model="ite.selected"
-															  >
+													{{ite.name}} ({{ite.Raum}})
+													<input
+														type="checkbox"
+														name="selectedFruits[]"
+														value="{{ite.name}}"
+														ng-model="ite.selected"
+													  >
 												</div>
 											</li>
 										</div>

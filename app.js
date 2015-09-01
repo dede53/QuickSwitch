@@ -98,7 +98,7 @@ var cookies = new Object;
 
 
 // Tabelle für Geräte anlegen
-db.run("CREATE TABLE if not exists [devices] ([deviceid] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,[status] TEXT  NULL,[name] TEXT  NOT NULL,[protocol] TEXT  NOT NULL,[buttonLabelOn] TEXT  NOT NULL,[buttonLabelOff] TEXT  NOT NULL,[CodeOn] TEXT,[CodeOff] TEXT,[room] TEXT);");
+db.run("CREATE TABLE if not exists [devices] ([deviceid] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,[status] TEXT  NULL,[name] TEXT  NOT NULL,[protocol] TEXT  NOT NULL,[buttonLabelOn] TEXT  NOT NULL,[buttonLabelOff] TEXT  NOT NULL,[CodeOn] TEXT,[CodeOff] TEXT,[roomid] TEXT);");
 
 // Tabelle für Diagrammtypen anlegen
 db.run("CREATE TABLE if not exists [charttypen] ([id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,[name] VARCHAR(30)  UNIQUE NOT NULL,[chart] VARCHAR(20)  UNIQUE NOT NULL);");
@@ -123,6 +123,12 @@ db.run("CREATE TABLE if not exists [sensors] ([id] INTEGER  PRIMARY KEY AUTOINCR
 
 // Tabelle für Benutzer anlegen
 db.run("CREATE TABLE if not exists [user] ([id] INTEGER  PRIMARY KEY NOT NULL,[name] TEXT  NULL,[anwesend] INTEGER  NULL,[password] VARCHAR(20)  NULL,[favoritDevices] VARCHAR(900)  NULL);");
+
+// Tabelle für Countdowns anlegen
+db.run("CREATE TABLE if not exists [countdowns] ([id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,[type] VARCHAR(20)  NOT NULL,[time] VARCHAR(20)  NOT NULL,[switchid] INTEGER  NOT NULL,[status] INTEGER  NOT NULL);");
+
+
+db.run("CREATE TABLE if not exists [countdowntypen] ([id] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,[type] VARCHAR(20)  UNIQUE NOT NULL);");
 
 
 app.use(bodyParser.json()); // for parsing application/json
@@ -167,7 +173,9 @@ app.io.route('newuser',function(req, res){
 	getCountdowns(req, res, function(data){
 		req.io.emit('countdowns', data);
 	});
-	getDevices(req, res, function(data){
+	/*
+*/
+	getDevices('array',req, res, function(data){
 		req.io.emit('devices', data);
 	});
 });
@@ -183,7 +191,7 @@ app.io.route('saveDevice', function(req, res){
 			"room": req.data.room
 		};
 		saveNewDevice(data, req, res, function(data){
-			getDevices(req, res, function(data){
+			getDevices('object', req, res, function(data){
 				app.io.broadcast('devices', data);
 			});
 		});
@@ -200,7 +208,7 @@ app.io.route('saveDevice', function(req, res){
 				"room": req.data.room
 			};
 		saveEditDevice(data, req, res, function(data){
-			getDevices(req, res, function(data){
+			getDevices('object',req, res, function(data){
 				app.io.broadcast('devices', data);
 			});
 		});
@@ -210,13 +218,14 @@ app.io.route('deleteDevice', function(req, res){
 	var id = req.data.id;
 	deleteDevice(id, req, res, function(data){
 		req.io.emit('deletedDevice', data);
-		getDevices(req, res, function(data){
+		getDevices('object',req, res, function(data){
 			app.io.broadcast('devices', data);
 		});
 	});
 });
 app.io.route('devices', function(req, res){
-	getDevices(req, res, function(data){
+	var type = req.data.type;
+	getDevices(type,req, res, function(data){
 		req.io.emit('devices', data);
 	});
 });
@@ -229,9 +238,12 @@ app.io.route('device', function(req, res){
 
 app.io.route('switchalldevices', function(req, res) {
 	var status = req.data.status;
+	console.log(status);
 	switchDevices(status, req, res, function(err){
-		if(err != 200){
+		if(err == 200){
 			console.log('Erfolgreich alle ' + status + ' geschaltet');
+		}else{
+			console.log(err);
 		}
 	});
 });
@@ -254,11 +266,6 @@ app.io.route('switchRoom', function(req, res){
 	});
 });
 
-app.io.route('countdowns', function(req, res){
-	getCountdowns(req, res, function(data){
-		req.io.emit('countdowns', data);
-	});
-});
 
 /************
 Socket.io routes für Benutzerbearbeitung
@@ -369,6 +376,37 @@ app.io.route('loadOldMessages', function(req){
 	});
 });
 
+app.io.route('countdowns', function(req, res){
+	getCountdowns(req, res, function(data){
+		req.io.emit('countdowns', data);
+	});
+});
+
+app.io.route('newCountdowntimer', function(req){
+	data = req.data;
+	data.settime = Math.floor(Date.parse(new Date));
+
+	data.time = data.settime + (data.time * 60000);
+	// data.device.name
+	// data.name
+	app.io.broadcast('newCountdown', data);
+	setNewCountdown(req.data, function(data){
+		if(data != "200"){
+			log("Nachricht konnte nicht gespeichert werden!", "error");
+			log( data , "error");
+		}
+	});
+/*
+*/
+});
+app.io.route('deleteCountdown', function(req, res){
+	var id = req.data.id;
+	deleteCountdown(id, req, res, function(data){
+		getCountdowns(req, res, function(data){
+			app.io.broadcast('countdowns', data);
+		});
+	});
+});
 
 app.io.route('getSensorvalues', function(req, res){
 	var id = req.data.id;
@@ -499,7 +537,8 @@ function favoritDevices(data, req, res, callback){
 		}
 	});
 	
-	var query = "SELECT devices.name, rooms.name AS room, status, deviceid, buttonLabelOff, buttonLabelOn FROM devices, rooms WHERE devices.room = rooms.id AND ("+ string +");";
+	// var query = "SELECT devices.name, rooms.name AS room, status, deviceid, buttonLabelOff, buttonLabelOn FROM devices, rooms WHERE devices.roomid = rooms.id AND ("+ string +");";
+	var query = "SELECT devices.*, rooms.name AS room FROM devices, rooms WHERE devices.roomid = rooms.id AND ("+ string +");";
 	db.all(query , function(err, data) {
 		if(err){
 			console.log(err);
@@ -560,7 +599,7 @@ function deleteUser(id, req, res, callback) {
 	});
 }
 function saveNewUser(data, req, res, callback) {
-	var query = "INSERT INTO user ( name, favoritDevices ) VALUES ('"+ data.name +"', '"+ data.favoritDevices +"');";
+	var query = "INSERT INTO user ( name, favoritDevices ) VALUES ('"+ data.name +"', '["+ data.favoritDevices +"]');";
 	db.run(query);
 	callback(201);
 }
@@ -572,20 +611,74 @@ function saveEditUser(data, req, res, callback) {
 }
 
 function getCountdowns(req,res,callback){
-	var query = "SELECT countdowns.id, countdowntypen.type, countdowns.switchid, countdowns.time, countdowns.status AS switchstatus, devices.* FROM countdowns, countdowntypen, devices WHERE countdowns.switchid = devices.deviceid AND countdowns.id = countdowntypen.id ;";
+	var query = "SELECT countdowns.id, countdowntypen.type, countdowns.switchid, countdowns.time, countdowns.status AS switchstatus FROM countdowns, countdowntypen;";
 	db.all(query, function(err, row){
 		if(err){
 			console.log(err);
 		}else{
-			console.log(row);
-			callback(row);
+			var bla = new Array;
+			async.each(row,
+				function(row, callback){
+					getDevice(row.switchid, req, res, function(device){
+						row.device = device[0];
+						bla.push(row);
+						callback();
+					});
+				},
+				function(err){
+					if(err){
+						console.log(err);
+					}else{
+						callback(bla);
+					}
+				}
+			);
 		}
 	});
 }
+function deleteCountdown(id, req, res, callback) {
+	var query = "SELECT * FROM countdowns WHERE id = " + id + ";";
+	db.all(query , function(err, row) {
+		if (err) {
+			console.log('Error: ' + err);
+			callback('Error: ' + err);
+		}else if (row == "") {
+			callback("300");
+			console.log("Kein Countdown mit der ID");
+		} else {
+			var query = "DELETE FROM countdowns WHERE id = "+ id +";";
+			db.all(query ,function(err,rows){
+				if(err){
+					console.log('Error: ' + err);
+					callback('Error: ' + err);
+				}else{
+					console.log('Delete Countdown with id: ' + id);
+					callback("200");
+				}
+			});
+		}
+	});
+}
+function setNewCountdown(data, callback){	
+	var query = "INSERT INTO countdowns (type, time, switchid, status) VALUES ('1','"+ data.time +"','"+ data.device.deviceid +"','"+ data.switchstatus +"');";
+	db.all(query, function(err, data){
+		if(err){
+			callback(err);
+		}else{
+			callback("200");
+		}
+	});
+	/*
+*/
+}
 
-function getDevices(req, res, callback) {
+function getDevices(type, req, res, callback) {
 	var query = "SELECT * FROM rooms;";
-	var uff = new Object;
+	if(type == "object"){
+		var uff = new Object;
+	}else{
+		var uff = new Array;
+	}
 	db.all(query, function(err, row){
 		if(err){
 			console.log(err);
@@ -593,15 +686,23 @@ function getDevices(req, res, callback) {
 		}else{
 			async.each(row,
 				function(row, callback){
-					uff[row.name] = new Object;
-					var query = "SELECT devices.name, rooms.name AS Raum, devices.room AS roomid, deviceid, buttonLabelOff, buttonLabelOn, status FROM devices, rooms WHERE room = '" + row.id + "'     AND    devices.room = rooms.id;";
+					var query = "SELECT rooms.name AS Raum, devices.* FROM devices, rooms WHERE devices.roomid = '" + row.id + "'     AND    devices.roomid = rooms.id;";
 					db.all(query , function(err, data) {
 						if(err){
 							console.log(err);
 						}else{
-							data.forEach(function(dat){
-								uff[row.name][dat.deviceid] = dat;								
-							});
+							if(type == "object"){
+								uff[row.name] = new Object;
+								data.forEach(function(dat){
+									uff[row.name][dat.deviceid] = dat;								
+								});
+							}else{
+								// uff[row.name] = new Array;
+								data.forEach(function(dat){
+									uff.push(dat);							
+								});
+								
+							}
 							callback();
 						}
 					});
@@ -618,7 +719,7 @@ function getDevices(req, res, callback) {
 	});
 };
 function getDevice(id, req, res, callback) {
-	var query = "SELECT * FROM devices WHERE deviceid = " + id + ";";
+	var query = "SELECT devices.*, rooms.name AS Raum FROM devices, rooms WHERE devices.roomid = rooms.id AND devices.deviceid = " + id + ";";
 	db.all(query , function(err, row) {
 		if (err) {
 			console.log(err);
@@ -632,12 +733,12 @@ function getDevice(id, req, res, callback) {
 	});
 }
 function saveNewDevice(data, req, res, callback) {
-	var query = "INSERT INTO devices ( name, protocol, buttonLabelOn, buttonLabelOff, CodeOn, CodeOff, room ) VALUES ('"+ data.name +"', '"+ data.protocol +"', '"+ data.buttonLabelOn +"', '"+ data.buttonLabelOff +"', '"+ data.CodeOn +"', '"+ data.CodeOff +"', '"+ data.room +"');";
+	var query = "INSERT INTO devices ( name, protocol, buttonLabelOn, buttonLabelOff, CodeOn, CodeOff, roomid ) VALUES ('"+ data.name +"', '"+ data.protocol +"', '"+ data.buttonLabelOn +"', '"+ data.buttonLabelOff +"', '"+ data.CodeOn +"', '"+ data.CodeOff +"', '"+ data.room +"');";
 	db.run(query);
 	callback(201);
 }
 function saveEditDevice(data, req, res, callback) {
-	var query = "UPDATE devices SET name = '"+ data.name +"', protocol = '"+ data.protocol +"', buttonLabelOn = '"+ data.buttonLabelOn +"', buttonLabelOff = '"+ data.buttonLabelOff +"', CodeOn = '"+ data.CodeOn +"', CodeOff = '"+ data.CodeOff +"', room = '"+ data.room +"' WHERE deviceid = '"+ data.deviceid +"';";
+	var query = "UPDATE devices SET name = '"+ data.name +"', protocol = '"+ data.protocol +"', buttonLabelOn = '"+ data.buttonLabelOn +"', buttonLabelOff = '"+ data.buttonLabelOff +"', CodeOn = '"+ data.CodeOn +"', CodeOff = '"+ data.CodeOff +"', roomid = '"+ data.room +"' WHERE deviceid = '"+ data.deviceid +"';";
 	db.run(query);
 	callback(201);
 }
@@ -666,16 +767,16 @@ function deleteDevice(id, req, res, callback) {
 }
 
 function switchRoom(room, status, req, res, callback){
-	var query = "SELECT deviceid, status, devices.name, protocol, buttonLabelOff, buttonLabelOn, CodeOn, CodeOff,devices.room AS roomid, rooms.name AS Raum FROM devices, rooms WHERE roomid = '" + room.id + "' AND devices.room = rooms.id;";
+	var query = "SELECT deviceid, status, devices.name, protocol, buttonLabelOff, buttonLabelOn, CodeOn, CodeOff,devices.roomid, rooms.name AS Raum FROM devices, rooms WHERE roomid = '" + room.id + "' AND devices.roomid = rooms.id;";
 	db.all(query , function(err, row) {
 		if (err) {
 			console.log(err);
 			callback(404);
 		} else {
 			row.forEach(function(device){
-				sendToSwitchserver(status, device);
+				sendToSwitchserver(req, status, device);
 			});
-			var query = "UPDATE devices SET status = '"+ status +"' WHERE room = "+ room.id +";";
+			var query = "UPDATE devices SET status = '"+ status +"' WHERE roomid = "+ room.id +";";
 			db.run(query);
 			callback(200);
 		}
@@ -751,7 +852,9 @@ function sendMessages(callback){
 function loadOldMessages(data, callback){
 	var query = "SELECT * FROM messages LIMIT 1;";
 	db.all(query , function(err, latest) {
-		if (err) {
+		if (err || latest == "") {
+			console.log("Fehler beim auslesen der letzten Nachricht, oder keine Nachricht in der Datenbank");
+			console.log(latest);
 			console.log(err);
 		}else{
 			var query = "SELECT time, type, author, message FROM messages WHERE time < "+ data +" AND time >=  (strftime('%s', datetime(("+ data +" /1000), 'unixepoch' ,'-24 hour'))* 1000) ORDER BY time DESC;";
@@ -781,13 +884,13 @@ function loadOldMessages(data, callback){
 }
 
 function switchDevice(id, status, req, res, callback) {
-	var query = "SELECT deviceid, status, devices.name, protocol, buttonLabelOff, buttonLabelOn, CodeOn, CodeOff,devices.room AS roomid, rooms.name AS Raum FROM devices, rooms WHERE deviceid = '" + id + "' AND devices.room = rooms.id;";
+	var query = "SELECT deviceid, status, devices.name, protocol, buttonLabelOff, buttonLabelOn, CodeOn, CodeOff,devices.roomid, rooms.name AS Raum FROM devices, rooms WHERE deviceid = '" + id + "' AND devices.roomid = rooms.id;";
 	db.all(query , function(err, row) {
 		if (err) {
 			console.log(err);
 			callback(404);
 		} else {
-			sendToSwitchserver(status, row[0]);
+			sendToSwitchserver(req, status, row[0]);
 			var query = "UPDATE devices SET status = '"+ status +"' WHERE deviceid = "+ id +";";
 			db.run(query);
 			callback(200);
@@ -795,15 +898,16 @@ function switchDevice(id, status, req, res, callback) {
 	});
 }
 function switchDevices(status, req, res, callback) {
-	var query = "SELECT * FROM devices;";
+	var query = "SELECT * FROM devices WHERE status != " + status + ";";
 	db.all(query , function(err, row) {
 		if (err) {
 			console.log(err);
 			callback(404);
 		} else {
+			console.log(row);
 			row.forEach(function(device){
-				sendToSwitchserver(status, device);
-				var query = "UPDATE devices SET status = '"+ status +"' WHERE deviceid = "+ device.id +";";
+				sendToSwitchserver(req, status, device);
+				var query = "UPDATE devices SET status = '"+ status +"' WHERE deviceid = "+ device.deviceid +";";
 				db.run(query);
 			});
 			callback(200);
@@ -814,7 +918,7 @@ function switchDevices(status, req, res, callback) {
 
 
 function sendActiveDevices(callback){
-	var query = "SELECT devices.name, rooms.name AS room FROM devices, rooms WHERE devices.room = rooms.id AND status = 1";
+	var query = "SELECT devices.name, rooms.name AS room FROM devices, rooms WHERE devices.roomid = rooms.id AND status != 0;";
 	db.all(query , function(err, activedevices) {
 		if (err) {
 			console.log(err);
@@ -912,7 +1016,7 @@ app.get('/room', function (req, res) {
 	});
 });
 app.get('/switches', function (req, res) {
-	getDevices(req, res, function(data){
+	getDevices('object',req, res, function(data){
 		res.json(data);
 	});
 });
@@ -981,7 +1085,15 @@ curl -i -X POST -H 'Content-Type: application/json' -d '{"nodeID": 15,"supplyV":
 curl -i -X POST -H 'Content-Type: application/json' -d '{"nodeID": 15,"supplyV": 2.2,"temp":12.3,"hum":59}' http://192.168.2.47:8000/newdata
 **************************/
 
-function sendToSwitchserver( action, data, switchserver){
+function sendToSwitchserver(req, action, data, switchserver){
+
+	log(action , "info");
+	if(data.protocol == 8){
+		req.io.broadcast('switchDevice', {"device":data,"status":action});
+	}else{
+		app.io.broadcast('switchDevice', {"device":data,"status":action});
+	}
+	
 	request.post({
 		url:'http://192.168.2.47:4040/switch/',
 		form:
@@ -996,7 +1108,6 @@ function sendToSwitchserver( action, data, switchserver){
 			log( err , "error");
 		}else{
 			log("Erfolgreich an den SwitchServer gesendet", "info");
-			app.io.broadcast('switchDevice', {"device":data,"status":action});
 			sendActiveDevices(function(err){
 				if(err != 200){
 					console.log("Error: Liste der aktiven Geräte konnte nicht gesendet werden" + err);

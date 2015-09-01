@@ -28,7 +28,8 @@ button{
 	/* overflow:visible; */
 	cursor:pointer;
 	min-width:60px;
-	padding: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 	
 	border:0px;
 	border-radius:0px;

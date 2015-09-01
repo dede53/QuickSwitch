@@ -15,6 +15,7 @@ var sleep = require('sleep');
 var bodyParser = require('body-parser');
 var multer = require('multer'); 
 var fritz = require('smartfritz');
+var piblaster = require('pi-blaster.js');
  
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -40,9 +41,13 @@ function switchdevice( status, data){
 			milight(status, data);
 			break;
 		case "5":
-		case "6":
+        case "6":
+		case "7":
 			sendUDP(status, data);
 			break;
+        case "8":
+            setGPIO(status, data);
+            break;
 		default:
 			console.log('FEHLER!!');
 			console.log(data.protocol);
@@ -50,6 +55,10 @@ function switchdevice( status, data){
 	}
 }
 
+function setGPIO(status, data){
+    console.log(status);
+    piblaster.setPwm(data.CodeOn, status );
+}
 
 function sendEXEC(status, data){
 	if(status == 1){

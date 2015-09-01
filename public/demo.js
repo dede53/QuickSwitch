@@ -18,6 +18,10 @@ app.config(['$routeProvider', function($routeProvider) {
 		templateUrl: 'templates/räume.html',
 		controller: 'roomController'
 	}).
+	when('/groups', {
+		templateUrl: 'templates/gruppen.html',
+		controller: 'groupController'
+	}).
 	otherwise({
 		redirectTo: '/favoriten'
 	});
@@ -49,8 +53,11 @@ app.factory('socket', function ($rootScope) {
 });
 
 app.controller('favoritenController',  function($scope, $rootScope, socket) {
-	
-
+   // $scope.$watch('favoritDevices', function(foo , bar) {
+        //$scope.i = parseFloat($scope.i);
+        //console.log(foo);
+        //console.log(bar);
+  //  });
 	// socket.emit('getSensorvalues', {"id":"all","date":"latest"});
 	
 
@@ -58,12 +65,21 @@ app.controller('favoritenController',  function($scope, $rootScope, socket) {
 	// socket.on('Sensorvalues', function(data) {
 		// $rootScope.temperature = data;
 	// });
+	$scope.deleteCountdown = function(data) {
+		socket.emit('deleteCountdown', {"id":data.id});	
+	}
+
 	$scope.loadOldMessages = function(){
 		socket.emit('loadOldMessages', $scope.sharedMessages[0].time);
 	}
 	
 	$scope.switchdevice = function(data) {
 		socket.emit('switchdevice', {"id":data.id,"status":data.status});
+	}
+	$scope.switchdeviceSlider = function(data) {
+		console.log($scope.favoritDevices[data.id].status);
+		socket.emit('switchdevice', {"id":data.id,"status":$scope.favoritDevices[data.id].status});
+		// socket.emit('switchdevice', {"id":data.id,"status":data.status});
 	}
 	$scope.switchalldevices = function(data) {
 		socket.emit('switchalldevices', {"status":data.status});
@@ -92,7 +108,7 @@ app.controller('devicesController',  function($scope, $rootScope, socket) {
 	/***********************************************
 	*	Daten anfordern
 	***********************************************/
-	socket.emit('devices');
+	socket.emit('devices', {"type":"object"});
 
 	/***********************************************
 	*	Daten empfangen, Scope zuordnen
@@ -104,6 +120,12 @@ app.controller('devicesController',  function($scope, $rootScope, socket) {
 	/***********************************************
 	*	Gerät schalten
 	***********************************************/
+	$scope.switchdeviceSlider = function(data) {
+		console.log($rootScope.devicelist[data.device.Raum][data.device.deviceid].status);
+		console.log(data.device.deviceid);
+		socket.emit('switchdevice', {"id":data.device.deviceid,"status": $rootScope.devicelist[data.device.Raum][data.device.deviceid].status});
+		// socket.emit('switchdevice', {"id":data.id,"status":data.status});
+	}
 	$scope.switchdevice = function(data) {
 		socket.emit('switchdevice', {"id":data.id,"status":data.status});
 	}
@@ -119,6 +141,40 @@ app.controller('devicesController',  function($scope, $rootScope, socket) {
 });
 
 app.controller('roomController',  function($scope, $rootScope, socket) {
+	/***********************
+	* Toggle Funktion für geraeteliste
+	****************************/
+	// $scope.custom = true;
+	// $scope.toggleCustom = function() {
+		// $scope.custom = $scope.custom === false ? true: false;
+	// };
+	
+	/***********************************************
+	*	Daten anfordern
+	***********************************************/
+	socket.emit('rooms');
+
+	/***********************************************
+	*	Daten empfangen, Scope zuordnen
+	***********************************************/
+	socket.on('rooms', function(data) {
+		$rootScope.roomlist = data;
+	});
+	
+	/***********************************************
+	*	Gerät schalten
+	***********************************************/
+	$scope.switchdevice = function(data) {
+		socket.emit('switchdevice', {"id":data.id,"status":data.status});
+	}
+	$scope.switchroom = function(data) {
+		// console.log(data);
+		socket.emit('switchRoom', data);
+	}
+	
+});
+
+app.controller('groupController',  function($scope, $rootScope, socket) {
 	/***********************
 	* Toggle Funktion für geraeteliste
 	****************************/
@@ -367,6 +423,26 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
 	
 });
 
+app.controller('newCountdowntimer', function($scope, socket) {
+		$scope.newCountdown = function() {
+			// Validierung!!
+			//console.log($scope.newCountdowntimer);
+			// console.log($scope.activeUser);
+			//var time = data.settime + (data.time * 60000);
+			//$scope.newCountdowntimer.time = 
+			/*
+			$scope.linkMessage = {
+				author: $scope.activeUser.name,
+				message: $scope.link.message,
+				type: $scope.link.type
+			}
+			$scope.link.message = "";
+			*/
+			socket.emit('newCountdowntimer', $scope.newCountdowntimer);
+		};
+
+});
+
 app.controller('sendNewMessage', function($scope, socket) {
 		$scope.sendMessage = function() {
 			// Validierung!!
@@ -424,7 +500,6 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
 	});
 	
 	socket.on('countdowns', function(data){
-		console.log(data);
 		$scope.activeCountdowns = data;
 	});
 	
@@ -457,6 +532,11 @@ app.controller("AppController", function($scope, $location, $rootScope, socket){
 	});
 	socket.on('newLinkMessage', function(data){
 		$scope.sharedMessages.push(data);
+	});
+
+	socket.on('newCountdown', function(data){
+		console.log(data);
+		$scope.activeCountdowns.push(data);
 	});
 	
 
