@@ -420,7 +420,7 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
 		credits: {
 			enabled: true
 		},
-		loading: false,
+		loading: true,
 		size: {}
 	}
 

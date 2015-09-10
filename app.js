@@ -409,120 +409,136 @@ app.io.route('deleteCountdown', function(req, res){
 });
 
 app.io.route('getSensorvalues', function(req, res){
-	var id = req.data.id;
-	if(!id){
-		console.log("Keine ID");
-	}else{
-		/*************
-		SELECT 
-				sensor_data.nodeID 	AS nodeID,
-				sensor_data.temp 	AS temp,
-				sensor_data.time 	AS datetime
-		WHERE
-				datetime between ' + min + ' and ' + max + '
-		ORDER BY
-				datetime
-		LIMIT
-				0, 5000;
-		************************/
-		// if(min && max){
-			// query = "SELECT nodeID 	AS nodeID, temp AS temp, time 	AS datetime FROM sensor_data WHERE datetime between  " + min + "  and  " + max + " ORDER BY datetime LIMIT 0, 5000;";
-			// db.all(query, function(err, data){
-				// if(err){
-					// console.log(err);
-				// }else{
-					// var bla = new Array;
-					// data.forEach(function(uff){
-						// var asd = new Array;
-						// asd.push(Math.floor(uff.time));
-						// asd.push(parseFloat(uff.temp / 100));
-						// bla.push(asd);
-					// });
-					// var data		= new Object;
-					// data.data		= bla;
-					// data.nodeID		= data.nodeID;
-					
-					// req.io.emit('reloadedValues', data);
-				// }
-			// });
-		// }else{
-				
-			
-			
-			/**************************
-			SELECT
-					sensor_data.nodeID 	AS nodeID,
-					sensor_data.temp 	AS temp,
-					sensors.name 		AS name,
-					sensors.linecolor 	AS farbe,
-					linetypen.line		AS linetype,
-					charttypen.chart	AS charttype
-			FROM
-					sensor_data,
-					sensors,
-					linetypen,
-					charttypen
-			WHERE
-					sensors.linetype	== linetypen.id AND
-					sensors.charttype	== charttypen.id AND
-					sensor_data.nodeID	== sensors.nodeID AND
-					1
-			GROUP BY
-					sensor_data.nodeID
-			ORDER BY
-					sensor_data.nodeID
-			ASC;
-			**************************/
-			
-			query ="SELECT sensor_data.nodeID 	AS nodeID, sensor_data.temp 	AS temp, sensors.name 		AS name, sensors.linecolor 	AS farbe, linetypen.line	AS linetype, charttypen.chart	AS charttype FROM sensor_data, sensors, linetypen, charttypen WHERE sensors.linetype	== linetypen.id AND sensors.charttype	== charttypen.id AND sensor_data.nodeID	== sensors.nodeID AND 1 GROUP BY sensor_data.nodeID ORDER BY sensor_data.nodeID ASC;";
-			db.all(query, function(err, sensors){
-				if(err){
+	console.log("IO_ROUTE_getSensorvalues");
+	var query ="SELECT sensors.nodeID 	AS nodeID, sensors.name 		AS name, sensors.linecolor 	AS farbe, linetypen.line	AS linetype, charttypen.chart	AS charttype FROM sensors, linetypen, charttypen WHERE sensors.linetype	== linetypen.id AND sensors.charttype	== charttypen.id AND sensors.nodeID	== sensors.nodeID;";
+	db.each(query, function(err, sensor){
+		if(err){
+			console.log(err);
+		}else{
+			console.log("Lade Daten");
+			// var query = "SELECT time, temp / 100  as temp FROM      sensor_data WHERE     strftime('%M', time / 1000, 'unixepoch') == '00' AND       strftime('%S', time / 1000, 'unixepoch') < '04' AND       strftime('%S', time / 1000, 'unixepoch') >= '00' AND nodeID = '"+ sensor.nodeID +"';";
+			var query = "SELECT time, temp / 100  as temp, strftime('%M', time / 1000, 'unixepoch') as min, strftime('%S', time / 1000, 'unixepoch') as sec FROM sensor_data WHERE sec < '04' AND sec >= '00' AND min == '00' AND nodeID = '"+ sensor.nodeID +"';";
+			db.all(query , function(err, data) {
+				if (err) {
 					console.log(err);
 				}else{
-					sensors.forEach(function(sensor){
-						// console.log(sensor);
-						getSensorvalues(sensor.nodeID, req, res, function(data){
-							/************************
-							Nimmt die Daten aus getSensorvalues und fügt sie in ein Array zusammen:
-							[[time,value],[time,value],[time,value],[time,value]]
-							************************/
-							var bla = new Array;
-							data.forEach(function(uff){
-								var asd = new Array;
-								asd.push(Math.floor(uff.time));
-								asd.push(parseFloat(uff.temp / 100));
-								bla.push(asd);
-							});
-							
-							/************************
-							Fügt die Daten in ein Object zusammen:
-							
-							{
-								"RAUM":{
-									data:[[time,value],[time,value],[time,value],[time,value]],
-									name: "Raum",
-									farbe: "ff00ff",
-									nodeID: 1
-								}
-							}
-							und Sendet das Object an die GUI
-							************************/
-							
-							var data		= new Object;
-							data.data		= bla;
-							data.name		= sensor.name;
-							data.farbe		= sensor.farbe;
-							data.nodeID		= sensor.nodeID;
-							data.linetype	= sensor.linetype;
-							data.charttype	= sensor.charttype;
-							
-							req.io.emit('Sensorvalues', data);
-						});
+					console.log(data);
+					var bla = new Array;
+					data.forEach(function(uff){
+						var asd = new Array;
+						asd.push(Math.floor(uff.time));
+						asd.push(parseFloat(uff.temp));
+						bla.push(asd);
 					});
+					
+					var data		= new Object;
+					data.data		= bla;
+					data.name		= sensor.name;
+					data.farbe		= sensor.farbe;
+					data.nodeID		= sensor.nodeID;
+					data.linetype	= sensor.linetype;
+					data.charttype	= sensor.charttype;
+					
+					req.io.emit('Sensorvalues', data);
+					/*
+					*/
+					console.log("gesendet!");
 				}
 			});
-		// }
+		}
+	});
+});
+
+app.io.route('getSensorvaluesByMinutes', function(req, res){
+	console.log(req.data);
+	var min = Math.round(req.data.min);
+	var max = Math.round(req.data.max);
+	var range = max - min;
+
+	// two days range loads minute data
+	if(range < 2 * 24 * 3600 * 1000){
+		var valueQuery = "SELECT time, temp / 100  as temp, strftime('%M', time / 1000, 'unixepoch') as min, strftime('%S', time / 1000, 'unixepoch') as sec FROM	sensor_data WHERE	sec < '04' AND		sec >= '00' AND		(min  == '00' OR min == '15' OR min == '30' OR min == '45') AND time <= "+ max +" AND time >= "+ min;
+	
+
+	// one month range loads hourly data
+	} else if (range < 31 * 24 * 3600 * 1000) {
+		var valueQuery = "SELECT time, temp / 100  as temp, strftime('%M', time / 1000, 'unixepoch') as min, strftime('%S', time / 1000, 'unixepoch') as sec FROM	sensor_data	WHERE	sec < '04' AND		sec >= '00' AND		min  == '00'";
+	
+
+	// one year range loads daily data
+	}else{
+		var valueQuery = "SELECT time, temp / 100  as temp, strftime('%H', time / 1000, 'unixepoch') as hour, strftime('%M', time / 1000, 'unixepoch') as min, strftime('%S', time / 1000, 'unixepoch') as sec FROM	sensor_data	WHERE	sec < '04' AND		sec >= '00' AND		min  == '00' AND 	hour == '00'";
 	}
+
+	console.log("IO_ROUTE_getSensorvaluesByMinutes");
+	var query ="SELECT sensors.nodeID		AS nodeID, sensors.name		AS name, sensors.linecolor	AS farbe, linetypen.line		AS linetype, charttypen.chart	AS charttype FROM sensors, linetypen, charttypen WHERE	sensors.linetype	== linetypen.id AND		sensors.charttype	== charttypen.id;";
+	db.all(query, function(err, sensors){
+		if(err){
+			console.log(err);
+		}else{
+			console.log("Lade Daten");
+			sensors.forEach(function(sensor){
+
+				// var query = "SELECT time, temp / 100  as temp FROM      sensor_data WHERE     strftime('%M', time / 1000, 'unixepoch') == '00' AND       strftime('%S', time / 1000, 'unixepoch') < '04' AND       strftime('%S', time / 1000, 'unixepoch') >= '00' AND nodeID = '"+ sensor.nodeID +"';";
+				var query = valueQuery + " AND nodeID = " + sensor.nodeID + ";";
+				db.all(query , function(err, data) {
+					if (err) {
+						console.log(err);
+					}else{
+						console.log(data);
+						var bla = new Array;
+						data.forEach(function(uff){
+							var asd = new Array;
+							asd.push(Math.floor(uff.time));
+							asd.push(parseFloat(uff.temp));
+							bla.push(asd);
+						});
+						
+						var data		= new Object;
+						data.data		= bla;
+						data.nodeID		= sensor.nodeID;
+						
+						req.io.emit('SensorvaluesByMinutes', data);
+						/*
+						*/
+						console.log("gesendet!");
+					}
+				});
+			});
+		}
+	});
+/*
+	db.each(query, function(err, sensor){
+		if(err){
+			console.log(err);
+		}else{
+			console.log("Lade Daten");
+			// var query = "SELECT time, temp / 100  as temp FROM      sensor_data WHERE     strftime('%M', time / 1000, 'unixepoch') == '00' AND       strftime('%S', time / 1000, 'unixepoch') < '04' AND       strftime('%S', time / 1000, 'unixepoch') >= '00' AND nodeID = '"+ sensor.nodeID +"';";
+			var query = "SELECT time, temp / 100  as temp, strftime('%M', time / 1000, 'unixepoch') as min, strftime('%S', time / 1000, 'unixepoch') as sec FROM sensor_data WHERE sec < '04' AND sec >= '00' AND (min  == '00' OR min == '30') AND  nodeID = '"+ sensor.nodeID +"';";
+			db.all(query , function(err, data) {
+				if (err) {
+					console.log(err);
+				}else{
+					console.log(data);
+					var bla = new Array;
+					data.forEach(function(uff){
+						var asd = new Array;
+						asd.push(Math.floor(uff.time));
+						asd.push(parseFloat(uff.temp));
+						bla.push(asd);
+					});
+					
+					var data		= new Object;
+					data.data		= bla;
+					data.nodeID		= sensor.nodeID;
+					
+					req.io.emit('SensorvaluesByMinutes', data);
+					console.log("gesendet!");
+				}
+			});
+		}
+	});
+*/
 });
 
 function favoritDevices(data, req, res, callback){
@@ -932,7 +948,7 @@ function sendActiveDevices(callback){
 	});
 }
 function getSensorvalues(id, req, res, callback) {
-	// console.log(id);
+	console.log(id);
 	// console.log(date);
 	// if(date == "latest" && id == "all"){
 		// // var query = "SELECT place,time,supplyV,temp,hum FROM sensor_values WHERE nodeID='" + id + "' ORDER BY id DESC Limit 1 ;";
@@ -943,10 +959,12 @@ function getSensorvalues(id, req, res, callback) {
 		// var query = "SELECT place,time,supplyV,temp,hum FROM sensor_data ORDER BY place;";
 	// }else if(date == "all" && id == "dia"){
 		// var query = "SELECT time, temp FROM sensor_data WHERE nodeID = '"+id+"' GROUP BY  strftime('%Y-%m-%d %H', time / 1000, 'unixepoch', 'localtime');";
-		var query = "SELECT time, temp FROM sensor_data WHERE nodeID = '"+id+"';";
+		//var query = "SELECT time, temp FROM sensor_data WHERE nodeID = '"+id+"';";
 	// }else{
 		// var query = "SELECT place,time,supplyV,temp,hum,date(time,'unixepoch') AS Date FROM sensor_data WHERE Date='"+ date +"' AND nodeID='" + id + "';";
 	// }
+	// var query = "SELECT * FROM sensor_data WHERE strftime('%M', time / 1000, 'unixepoch') == '00' AND strftime('%S', time / 1000, 'unixepoch') < '04' AND strftime('%S', time / 1000, 'unixepoch') >= '00' AND nodeID == '"+ id +"';";
+	var query = "SELECT time, temp / 100  as temp FROM      sensor_data WHERE     strftime('%M', time / 1000, 'unixepoch') == '00' AND       strftime('%S', time / 1000, 'unixepoch') < '04' AND       strftime('%S', time / 1000, 'unixepoch') >= '00';";
 	db.all(query , function(err, row) {
 		if (err) {
 			console.log(err);

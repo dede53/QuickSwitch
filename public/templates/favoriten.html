@@ -14,8 +14,16 @@
 								</div>
 									<div ng-if="devices.protocol == 8" class="ui-block-b" style="text-align:right">
 										<div class="box-btn-switch">
-											<a href=""><</a>{{devices.status}}<input type="range" min="{{devices.buttonLabelOn}}" max="{{devices.buttonLabelOff}}" ng-model="devices.status" ng-change='switchdeviceSlider({"id":devices.deviceid})'></input>
-											<a href="">></a>
+											{{devices.status}}
+											<input 
+												type="range" 
+												min="{{devices.buttonLabelOn}}" 
+												max="{{devices.buttonLabelOff}}" 
+												ng-model="devices.status" 
+												ng-change='switchdeviceSlider({"id":devices.deviceid})'
+												ng-model-options="{ updateOn: 'blur' }"
+											>
+											</input>
 										</div>
 									</div>
 									<div ng-if="devices.protocol != 8 " class="ui-block-b" style="text-align:right">
@@ -126,9 +134,11 @@
 								</li>
 								<li>
 										<label for="minutes">Minuten</label>
-										<input id="minutes" type="number" min="1" max="50"		ng-model="newCountdowntimer.time">
+										<input id="minutes" type="number" min="1" max="45"		ng-model="newCountdowntimer.time">
 								</li>
 								<li>
+									<input type="range" ng-model="newCountdowntimer.time" min="1" max="45" ></input>
+								</li>
 										<button ng-click="newCountdown()">Senden!</button>
 								</li>
 							</ul>

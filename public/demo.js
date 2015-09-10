@@ -121,8 +121,8 @@ app.controller('devicesController',  function($scope, $rootScope, socket) {
 	*	Gerät schalten
 	***********************************************/
 	$scope.switchdeviceSlider = function(data) {
-		console.log($rootScope.devicelist[data.device.Raum][data.device.deviceid].status);
-		console.log(data.device.deviceid);
+		//console.log($rootScope.devicelist[data.device.Raum][data.device.deviceid].status);
+		//console.log(data.device.deviceid);
 		socket.emit('switchdevice', {"id":data.device.deviceid,"status": $rootScope.devicelist[data.device.Raum][data.device.deviceid].status});
 		// socket.emit('switchdevice', {"id":data.id,"status":data.status});
 	}
@@ -209,38 +209,6 @@ app.controller('groupController',  function($scope, $rootScope, socket) {
 });
 
 app.controller('temperatureController',  function($scope, $rootScope, socket) {
-
-	// $rootScope.instruction = [];
-	// $rootScope.instruction.css = "position: absolute;left: 0px;top: 0px;width:100%;height:100%;text-align:center;z-index: 1000;background-color: #fff; ";
-	// $rootScope.instruction.css2 = " width:200px; margin: 0px 100px auto auto; background-color: #fff; border:1px solid #000; padding:15px; text-align:center;";
-	// $rootScope.instruction.text="Hier werden Temperaturen angezeigt:";
-	// $rootScope.instruction.toggle("instruction");
-	// function afterSetExtremes(e) {
-			// console.log(e.min);
-			// console.log(e.max);
-			// socket.emit('getSensorvalues', {"id":"all","min":e.min, "max":e.max});
-			// socket.on('reloadedValues', function(data) {
-				// // var sensor = {
-					// // id: data.nodeID,
-					// // data: data.data
-				// // };
-				// // $rootScope.chartConfig.series[0].data.setData(data);
-				
-				// $rootScope.chartConfig.series[0].data = [];
-				// $rootScope.chartConfig.series[0].data.push(data.data);
-			// });
-        // // var chart = $('#container').highcharts();
-
-        // // chart.showLoading('Loading data from server...');
-        // // $.getJSON('http://www.highcharts.com/samples/data/from-sql.php?start=' + Math.round(e.min) +
-                // // '&end=' + Math.round(e.max) + '&callback=?', function (data) {
-
-                // // chart.series[0].setData(data);
-                // // chart.hideLoading();
-            // // });
-    // }
-	
-	
 	$rootScope.chartConfig = "";
 	$rootScope.chartConfig = {
         options: {
@@ -249,6 +217,7 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
                 zoomType: 'x'
             },
             navigator: {
+            	adaptToUpdatedData: false,
                 enabled: true,
                 series: []
             },
@@ -274,13 +243,16 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
                     type: 'all',
                     text: 'Alle'
                 }],
+                inputEnabled: false,
                 selected : 4 // all
             },
             plotOptions: {
                 series: {
                     lineWidth: 1,
-                    fillOpacity: 0.5
-
+                    fillOpacity: 0.5,
+                    marker:{
+                    	enable: true
+                    }
                 },
                 column: {
                     stacking: 'normal'
@@ -296,18 +268,9 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
             exporting: false,
             xAxis: [{
                 type: 'datetime',
-				dateTimeLabelFormats: {
-					second: '%Y-%m-%d<br/>%H:%M:%S',
-					minute: '%Y-%m-%d<br/>%H:%M',
-					hour: '%Y-%m-%d<br/>%H:%M',
-					day: '%Y<br/>%m-%d',
-					week: '%Y<br/>%m-%d',
-					month: '%Y-%m',
-					year: '%Y'
-				},
-				// events : {
-                    // afterSetExtremes : afterSetExtremes
-                // },
+				events : {
+                    afterSetExtremes : afterSetExtremes
+                },
 				labels:{
 					rotation: -45
 				}
@@ -332,25 +295,6 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
 
 
                 }
-				// ,
-                // { // Secondary yAxis
-                    // min: 0,
-                    // allowDecimals: false,
-                    // title: {
-                        // text: 'Luftfeuchtigkeit',
-                        // style: {
-                            // color: '#c680ca'
-                        // }
-                    // },
-                    // labels: {
-                        // format: '{value}',
-                        // style: {
-                            // color: '#c680ca'
-                        // }
-                    // },
-                    // opposite: true
-
-                // }
             ],
 
             legend: {
@@ -362,8 +306,6 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
             credits: {
                 enabled: false
             },
-
-            loading: false,
             tooltip: {
                 headerFormat: '<div class="header">{point.key}</div>',
                 pointFormat: '<div class="line"><div class="circle" ></div><p class="country" style="float:left;">{series.name}</p><p>{point.y}</p></div>',
@@ -380,16 +322,41 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
                 shared: true
             },
             useHighStocks: true
-
         },
-        series: []
-
-
+        series: [],
+        loading: true
     }
+	function afterSetExtremes(e) {
+			
+			
+			if(e.trigger == 'zoom' || e.trigger == 'rangeSelectorButton' || e.trigger == 'navigator'){
+				console.log(e);
+				var chart = $rootScope.chartConfig.getHighcharts();
+				socket.emit('getSensorvaluesByMinutes', {"id":"all","min":e.min, "max":e.max});
+				chart.showLoading('Loading...' + e.trigger);
+			}else{
+				console.log("kein Zoom!");
+				console.log(e);
+			}
 
+			socket.on('SensorvaluesByMinutes', function(data) {
+				console.log(data.nodeID);
+				var chart = $rootScope.chartConfig.getHighcharts();
+		        chart.series[0].setData(data.data);
+		        chart.hideLoading();
+		        /*
+		        	{
+			        	[1438039000000,25],
+			        	[1438039200000,26]
+			        }
+			    */
+		        // chart.series[0].addPoint([1438039000000,25]);
+			});
+    }
 	
-	socket.emit('getSensorvalues', {"id":"dia","date":"all"});
-	$rootScope.chartConfig.series = [];
+	
+
+	socket.emit('getSensorvalues', {"id":"1","date":"all"});
 	socket.on('Sensorvalues', function(data) {
 		console.log("Neue Daten");
 		var sensor = {
@@ -398,22 +365,29 @@ app.controller('temperatureController',  function($scope, $rootScope, socket) {
 			data: data.data,
 			type: data.linetyp,
 			yAxis: 0,
+			connectNulls:false,
 			tooltip: {
 				valueSuffix: ' °C'
 			},
-			color: '#'+data.farbe
+			color: '#' + data.farbe
 		};
 		var navigator = {
 			data: data.data
 		};
 		
 		$rootScope.chartConfig.options.navigator.series.push(navigator);
+
 		$rootScope.chartConfig.series.push(sensor);
+		$rootScope.chartConfig.loading = false;
 	});
 		
 	Highcharts.setOptions({
 		global : {
 			useUTC : false
+		},
+		lang : {
+			loading: "Lade Daten...",
+			rangeSelectorZoom: ""
 		}
 	});
 		
